@@ -14,8 +14,8 @@ impl RenderOnce for ApplicationMenu {
         PopoverMenu::new("application-menu")
             .menu(move |cx| {
                 ContextMenu::build(cx, move |menu, cx| {
-                    menu.header("Workspace")
-                        .action("Open Command Palette", Box::new(command_palette::Toggle))
+                    menu.header("工作区")
+                        .action("打开命令面板", Box::new(command_palette::Toggle))
                         .when_some(cx.focused(), |menu, focused| menu.context(focused))
                         .custom_row(move |cx| {
                             h_flex()
@@ -23,7 +23,7 @@ impl RenderOnce for ApplicationMenu {
                                 .w_full()
                                 .justify_between()
                                 .cursor(gpui::CursorStyle::Arrow)
-                                .child(Label::new("Buffer Font Size"))
+                                .child(Label::new("缓冲区字体大小"))
                                 .child(
                                     NumericStepper::new(
                                         theme::get_buffer_font_size(cx).to_string(),
@@ -57,7 +57,7 @@ impl RenderOnce for ApplicationMenu {
                                 .w_full()
                                 .justify_between()
                                 .cursor(gpui::CursorStyle::Arrow)
-                                .child(Label::new("UI Font Size"))
+                                .child(Label::new("UI 字体大小"))
                                 .child(
                                     NumericStepper::new(
                                         theme::get_ui_font_size(cx).to_string(),
@@ -85,36 +85,36 @@ impl RenderOnce for ApplicationMenu {
                                 )
                                 .into_any_element()
                         })
-                        .header("Project")
+                        .header("项目")
                         .action(
-                            "Add Folder to Project...",
+                            "将文件夹添加到项目...",
                             Box::new(workspace::AddFolderToProject),
                         )
-                        .action("Open a new Project...", Box::new(workspace::Open))
+                        .action("打开一个新项目...", Box::new(workspace::Open))
                         .action(
-                            "Open Recent Projects...",
+                            "打开最近的项目...",
                             Box::new(recent_projects::OpenRecent {
                                 create_new_window: false,
                             }),
                         )
-                        .header("Help")
-                        .action("About Zed", Box::new(zed_actions::About))
-                        .action("Welcome", Box::new(workspace::Welcome))
+                        .header("帮助")
+                        .action("关于 Zed", Box::new(zed_actions::About))
+                        .action("欢迎", Box::new(workspace::Welcome))
                         .link(
-                            "Documentation",
+                            "文档",
                             Box::new(zed_actions::OpenBrowser {
                                 url: "https://zed.dev/docs".into(),
                             }),
                         )
-                        .action("Give Feedback", Box::new(feedback::GiveFeedback))
-                        .action("Check for Updates", Box::new(auto_update::Check))
-                        .action("View Telemetry", Box::new(zed_actions::OpenTelemetryLog))
+                        .action("提供反馈", Box::new(feedback::GiveFeedback))
+                        .action("检查更新", Box::new(auto_update::Check))
+                        .action("查看遥测数据", Box::new(zed_actions::OpenTelemetryLog))
                         .action(
-                            "View Dependency Licenses",
+                            "查看依赖项许可证",
                             Box::new(zed_actions::OpenLicenses),
                         )
                         .separator()
-                        .action("Quit", Box::new(zed_actions::Quit))
+                        .action("退出", Box::new(zed_actions::Quit))
                 })
                 .into()
             })
