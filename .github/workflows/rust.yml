@@ -49,6 +49,7 @@ jobs:
       - name: Build archive
         shell: bash
         run: |
+          ls -lah
           binary_name="zed"
 
           dirname="$binary_name-${{ env.VERSION }}-${{ matrix.target }}"
