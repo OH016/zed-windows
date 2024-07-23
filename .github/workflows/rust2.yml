@@ -1,0 +1,26 @@
+name: rust2
+
+on:
+  workflow_dispatch:
+  
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          clean: false
+
+      # - name: Cache dependencies
+      #   uses: swatinem/rust-cache@v2
+      #   with:
+      #     save-if: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build Zed
+        run: cargo build -p zed
