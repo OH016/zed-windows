@@ -17,10 +17,10 @@ jobs:
         with:
           clean: false
 
-      # - name: Cache dependencies
-      #   uses: swatinem/rust-cache@v2
-      #   with:
-      #     save-if: ${{ github.ref == 'refs/heads/main' }}
+      - name: Cache dependencies
+        uses: swatinem/rust-cache@v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
 
       - name: Build Zed
         run: cargo build -p zed
