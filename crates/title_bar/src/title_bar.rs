@@ -274,7 +274,7 @@ impl TitleBar {
                             .size(LabelSize::Small)
                             .line_height_style(LineHeightStyle::UiLabel),
                     )
-                    .tooltip(move |cx| Tooltip::text("Project is hosted on a dev server", cx))
+                    .tooltip(move |cx| Tooltip::text("项目托管在开发服务器上", cx))
                     .on_click(cx.listener(|this, _, cx| {
                         if let Some(workspace) = this.workspace.upgrade() {
                             recent_projects::DevServerProjects::open(workspace, cx)
@@ -310,7 +310,7 @@ impl TitleBar {
                 .tooltip(move |cx| {
                     Tooltip::text(
                         format!(
-                            "{} is sharing this project. Click to follow.",
+                            "{} 正在分享这个项目 点击关注",
                             host_user.github_login.clone()
                         ),
                         cx,
@@ -343,7 +343,7 @@ impl TitleBar {
         let name = if let Some(name) = name {
             util::truncate_and_trailoff(name, MAX_PROJECT_NAME_LENGTH)
         } else {
-            "Open recent project".to_string()
+            "打开最近的项目".to_string()
         };
 
         let workspace = self.workspace.clone();
@@ -353,7 +353,7 @@ impl TitleBar {
             .label_size(LabelSize::Small)
             .tooltip(move |cx| {
                 Tooltip::for_action(
-                    "Recent Projects",
+                    "最近项目",
                     &recent_projects::OpenRecent {
                         create_new_window: false,
                     },
@@ -391,9 +391,9 @@ impl TitleBar {
                 .label_size(LabelSize::Small)
                 .tooltip(move |cx| {
                     Tooltip::with_meta(
-                        "Recent Branches",
+                        "最近的分支",
                         Some(&ToggleVcsMenu),
-                        "Local branches only",
+                        "仅本地分支",
                         cx,
                     )
                 })
@@ -456,7 +456,7 @@ impl TitleBar {
                 div()
                     .id("disconnected")
                     .child(Icon::new(IconName::Disconnected).size(IconSize::Small))
-                    .tooltip(|cx| Tooltip::text("Disconnected", cx))
+                    .tooltip(|cx| Tooltip::text("断开", cx))
                     .into_any_element(),
             ),
             client::Status::UpgradeRequired => {
@@ -511,12 +511,12 @@ impl TitleBar {
             PopoverMenu::new("user-menu")
                 .menu(|cx| {
                     ContextMenu::build(cx, |menu, _| {
-                        menu.action("Settings", zed_actions::OpenSettings.boxed_clone())
-                            .action("Key Bindings", Box::new(zed_actions::OpenKeymap))
-                            .action("Themes…", theme_selector::Toggle::default().boxed_clone())
-                            .action("Extensions", extensions_ui::Extensions.boxed_clone())
+                        menu.action("设置", zed_actions::OpenSettings.boxed_clone())
+                            .action("按键绑定", Box::new(zed_actions::OpenKeymap))
+                            .action("主题...", theme_selector::Toggle::default().boxed_clone())
+                            .action("扩展", extensions_ui::Extensions.boxed_clone())
                             .separator()
-                            .action("Sign Out", client::SignOut.boxed_clone())
+                            .action("登出", client::SignOut.boxed_clone())
                     })
                     .into()
                 })
@@ -533,17 +533,17 @@ impl TitleBar {
                                 ),
                         )
                         .style(ButtonStyle::Subtle)
-                        .tooltip(move |cx| Tooltip::text("Toggle User Menu", cx)),
+                        .tooltip(move |cx| Tooltip::text("切换用户菜单", cx)),
                 )
                 .anchor(gpui::AnchorCorner::TopRight)
         } else {
             PopoverMenu::new("user-menu")
                 .menu(|cx| {
                     ContextMenu::build(cx, |menu, _| {
-                        menu.action("Settings", zed_actions::OpenSettings.boxed_clone())
-                            .action("Key Bindings", Box::new(zed_actions::OpenKeymap))
-                            .action("Themes…", theme_selector::Toggle::default().boxed_clone())
-                            .action("Extensions", extensions_ui::Extensions.boxed_clone())
+                        menu.action("设置", zed_actions::OpenSettings.boxed_clone())
+                            .action("按键绑定", Box::new(zed_actions::OpenKeymap))
+                            .action("主题...", theme_selector::Toggle::default().boxed_clone())
+                            .action("扩展", extensions_ui::Extensions.boxed_clone())
                     })
                     .into()
                 })
@@ -557,7 +557,7 @@ impl TitleBar {
                             ),
                         )
                         .style(ButtonStyle::Subtle)
-                        .tooltip(move |cx| Tooltip::text("Toggle User Menu", cx)),
+                        .tooltip(move |cx| Tooltip::text("切换用户菜单", cx)),
                 )
         }
     }
