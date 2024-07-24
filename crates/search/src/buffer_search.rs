@@ -151,12 +151,12 @@ impl Render for BufferSearchBar {
             query_editor.placeholder_text(cx).is_none()
         }) {
             self.query_editor.update(cx, |editor, cx| {
-                editor.set_placeholder_text("Search", cx);
+                editor.set_placeholder_text("搜索", cx);
             });
         }
 
         self.replacement_editor.update(cx, |editor, cx| {
-            editor.set_placeholder_text("Replace with...", cx);
+            editor.set_placeholder_text("用...来代替", cx);
         });
 
         let mut text_color = Color::Default;
@@ -247,7 +247,7 @@ impl Render for BufferSearchBar {
                         }))
                         .selected(self.replace_enabled)
                         .size(ButtonSize::Compact)
-                        .tooltip(|cx| Tooltip::for_action("Toggle replace", &ToggleReplace, cx)),
+                        .tooltip(|cx| Tooltip::for_action("切换替换", &ToggleReplace, cx)),
                 )
             })
             .when(supported_options.selection, |this| {
@@ -266,7 +266,7 @@ impl Render for BufferSearchBar {
                     .selected(self.selection_search_enabled)
                     .size(ButtonSize::Compact)
                     .tooltip(|cx| {
-                        Tooltip::for_action("Toggle search selection", &ToggleSelection, cx)
+                        Tooltip::for_action("切换搜索选择", &ToggleSelection, cx)
                     }),
                 )
             })
@@ -278,19 +278,19 @@ impl Render for BufferSearchBar {
                             .on_click(|_, cx| cx.dispatch_action(SelectAllMatches.boxed_clone()))
                             .size(ButtonSize::Compact)
                             .tooltip(|cx| {
-                                Tooltip::for_action("Select all matches", &SelectAllMatches, cx)
+                                Tooltip::for_action("选择所有匹配项", &SelectAllMatches, cx)
                             }),
                     )
                     .child(render_nav_button(
                         ui::IconName::ChevronLeft,
                         self.active_match_index.is_some(),
-                        "Select previous match",
+                        "选择上一个",
                         &SelectPrevMatch,
                     ))
                     .child(render_nav_button(
                         ui::IconName::ChevronRight,
                         self.active_match_index.is_some(),
-                        "Select next match",
+                        "选择下一个",
                         &SelectNextMatch,
                     ))
                     .when(!narrow_mode, |this| {
@@ -333,7 +333,7 @@ impl Render for BufferSearchBar {
                         .child(
                             IconButton::new("search-replace-next", ui::IconName::ReplaceNext)
                                 .tooltip(move |cx| {
-                                    Tooltip::for_action("Replace next", &ReplaceNext, cx)
+                                    Tooltip::for_action("替换下一个", &ReplaceNext, cx)
                                 })
                                 .on_click(
                                     cx.listener(|this, _, cx| this.replace_next(&ReplaceNext, cx)),
@@ -342,7 +342,7 @@ impl Render for BufferSearchBar {
                         .child(
                             IconButton::new("search-replace-all", ui::IconName::ReplaceAll)
                                 .tooltip(move |cx| {
-                                    Tooltip::for_action("Replace all", &ReplaceAll, cx)
+                                    Tooltip::for_action("全部替换", &ReplaceAll, cx)
                                 })
                                 .on_click(
                                     cx.listener(|this, _, cx| this.replace_all(&ReplaceAll, cx)),
@@ -387,9 +387,9 @@ impl Render for BufferSearchBar {
                     .child(search_line.w_full())
                     .when(!narrow_mode, |div| {
                         div.child(
-                            IconButton::new(SharedString::from("Close"), IconName::Close)
+                            IconButton::new(SharedString::from("关闭"), IconName::Close)
                                 .tooltip(move |cx| {
-                                    Tooltip::for_action("Close search bar", &Dismiss, cx)
+                                    Tooltip::for_action("关闭搜索栏", &Dismiss, cx)
                                 })
                                 .on_click(cx.listener(|this, _: &ClickEvent, cx| {
                                     this.dismiss(&Dismiss, cx)
