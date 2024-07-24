@@ -28,5 +28,5 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: zed.exe
-          path: target/release/zed.exe
+          name: zed-windows
+          path: target/release/
