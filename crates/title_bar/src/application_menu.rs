@@ -14,7 +14,7 @@ impl RenderOnce for ApplicationMenu {
         PopoverMenu::new("application-menu")
             .menu(move |cx| {
                 ContextMenu::build(cx, move |menu, cx| {
-                    menu.header("工作区")
+                    menu.header("工作")
                         .action("打开命令面板", Box::new(command_palette::Toggle))
                         .when_some(cx.focused(), |menu, focused| menu.context(focused))
                         .custom_row(move |cx| {
@@ -23,7 +23,7 @@ impl RenderOnce for ApplicationMenu {
                                 .w_full()
                                 .justify_between()
                                 .cursor(gpui::CursorStyle::Arrow)
-                                .child(Label::new("缓冲区字体大小"))
+                                .child(Label::new("编辑器字体大小"))
                                 .child(
                                     NumericStepper::new(
                                         theme::get_buffer_font_size(cx).to_string(),
@@ -121,7 +121,7 @@ impl RenderOnce for ApplicationMenu {
             .trigger(
                 IconButton::new("application-menu", ui::IconName::Menu)
                     .style(ButtonStyle::Subtle)
-                    .tooltip(|cx| Tooltip::text("Open Application Menu", cx))
+                    .tooltip(|cx| Tooltip::text("打开应用程序菜单", cx))
                     .icon_size(IconSize::Small),
             )
             .into_any_element()
