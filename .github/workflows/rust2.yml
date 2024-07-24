@@ -23,7 +23,7 @@ jobs:
           save-if: ${{ github.ref == 'refs/heads/main' }}
 
       - name: Build Zed
-        run: cargo build -p zed
+        run: cargo build --release -p zed
           
       - name: Upload
         uses: actions/upload-artifact@v4
