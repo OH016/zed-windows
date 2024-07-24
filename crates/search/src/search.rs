@@ -52,11 +52,11 @@ bitflags! {
 impl SearchOptions {
     pub fn label(&self) -> &'static str {
         match *self {
-            SearchOptions::WHOLE_WORD => "Match whole words",
-            SearchOptions::CASE_SENSITIVE => "Match case sensitively",
-            SearchOptions::INCLUDE_IGNORED => "Also search files ignored by configuration",
-            SearchOptions::REGEX => "Use regular expressions",
-            _ => panic!("{:?} is not a named SearchOption", self),
+            SearchOptions::WHOLE_WORD => "匹配整个单词",
+            SearchOptions::CASE_SENSITIVE => "区分大小写",
+            SearchOptions::INCLUDE_IGNORED => "搜索配置忽略的文件",
+            SearchOptions::REGEX => "使用正则表达式",
+            _ => panic!("{:?} 不是命名的 SearchOption", self),
         }
     }
 
@@ -66,7 +66,7 @@ impl SearchOptions {
             SearchOptions::CASE_SENSITIVE => ui::IconName::CaseSensitive,
             SearchOptions::INCLUDE_IGNORED => ui::IconName::Sliders,
             SearchOptions::REGEX => ui::IconName::Regex,
-            _ => panic!("{:?} is not a named SearchOption", self),
+            _ => panic!("{:?} 不是命名的 SearchOption", self),
         }
     }
 
@@ -76,7 +76,7 @@ impl SearchOptions {
             SearchOptions::CASE_SENSITIVE => Box::new(ToggleCaseSensitive),
             SearchOptions::INCLUDE_IGNORED => Box::new(ToggleIncludeIgnored),
             SearchOptions::REGEX => Box::new(ToggleRegex),
-            _ => panic!("{:?} is not a named SearchOption", self),
+            _ => panic!("{:?} 不是命名的 SearchOption", self),
         }
     }
 
@@ -120,7 +120,7 @@ pub(crate) fn show_no_more_matches(cx: &mut WindowContext) {
         workspace
             .update(cx, |workspace, cx| {
                 workspace.show_toast(
-                    Toast::new(notification_id.clone(), "No more matches").autohide(),
+                    Toast::new(notification_id.clone(), "没有更多匹配").autohide(),
                     cx,
                 );
             })
