@@ -365,25 +365,25 @@ impl Pane {
                             .icon_size(IconSize::Small)
                             .on_click(cx.listener(|pane, _, cx| {
                                 let menu = ContextMenu::build(cx, |menu, _| {
-                                    menu.action("New File", NewFile.boxed_clone())
+                                    menu.action("新建文件", NewFile.boxed_clone())
                                         .action(
-                                            "Open File",
+                                            "打开文件",
                                             ToggleFileFinder::default().boxed_clone(),
                                         )
                                         .separator()
                                         .action(
-                                            "Search Project",
+                                            "搜索项目",
                                             DeploySearch {
                                                 replace_enabled: false,
                                             }
                                             .boxed_clone(),
                                         )
                                         .action(
-                                            "Search Symbols",
+                                            "搜索符号",
                                             ToggleProjectSymbols.boxed_clone(),
                                         )
                                         .separator()
-                                        .action("New Terminal", NewTerminal.boxed_clone())
+                                        .action("新建终端", NewTerminal.boxed_clone())
                                 });
                                 cx.subscribe(&menu, |pane, _, _: &DismissEvent, cx| {
                                     pane.focus(cx);
@@ -392,7 +392,7 @@ impl Pane {
                                 .detach();
                                 pane.new_item_menu = Some(menu);
                             }))
-                            .tooltip(|cx| Tooltip::text("New...", cx)),
+                            .tooltip(|cx| Tooltip::text("新建...", cx)),
                     )
                     .when_some(pane.new_item_menu.as_ref(), |el, new_item_menu| {
                         el.child(Self::render_menu_overlay(new_item_menu))
@@ -402,10 +402,10 @@ impl Pane {
                             .icon_size(IconSize::Small)
                             .on_click(cx.listener(|pane, _, cx| {
                                 let menu = ContextMenu::build(cx, |menu, _| {
-                                    menu.action("Split Right", SplitRight.boxed_clone())
-                                        .action("Split Left", SplitLeft.boxed_clone())
-                                        .action("Split Up", SplitUp.boxed_clone())
-                                        .action("Split Down", SplitDown.boxed_clone())
+                                    menu.action("向右分割", SplitRight.boxed_clone())
+                                        .action("向左分割", SplitLeft.boxed_clone())
+                                        .action("向上分割", SplitUp.boxed_clone())
+                                        .action("向下分割", SplitDown.boxed_clone())
                                 });
                                 cx.subscribe(&menu, |pane, _, _: &DismissEvent, cx| {
                                     pane.focus(cx);
@@ -414,7 +414,7 @@ impl Pane {
                                 .detach();
                                 pane.split_item_menu = Some(menu);
                             }))
-                            .tooltip(|cx| Tooltip::text("Split Pane", cx)),
+                            .tooltip(|cx| Tooltip::text("拆分窗格", cx)),
                     )
                     .child({
                         let zoomed = pane.is_zoomed();
@@ -427,7 +427,7 @@ impl Pane {
                             }))
                             .tooltip(move |cx| {
                                 Tooltip::for_action(
-                                    if zoomed { "Zoom Out" } else { "Zoom In" },
+                                    if zoomed { "缩小" } else { "放大" },
                                     &ToggleZoom,
                                     cx,
                                 )
@@ -1142,14 +1142,14 @@ impl Pane {
         if should_display_followup_text {
             let not_shown_files = all_dirty_items - file_names.len();
             if not_shown_files == 1 {
-                file_names.push(".. 1 file not shown".into());
+                file_names.push(".. 1 个文件未显示".into());
             } else {
-                file_names.push(format!(".. {} files not shown", not_shown_files));
+                file_names.push(format!(".. {} 未显示文件", not_shown_files));
             }
         }
         (
             format!(
-                "Do you want to save changes to the following {} files?",
+                "是否要保存对以下内容的更改 {} 文件?",
                 all_dirty_items
             ),
             file_names.join("\n"),
@@ -1198,7 +1198,7 @@ impl Pane {
                         PromptLevel::Warning,
                         &prompt,
                         Some(&detail),
-                        &["Save all", "Discard all", "Cancel"],
+                        &["保存全部", "全部放弃", "取消"],
                     )
                 })?;
                 match answer.await {
@@ -1367,7 +1367,7 @@ impl Pane {
         cx: &mut AsyncWindowContext,
     ) -> Result<bool> {
         const CONFLICT_MESSAGE: &str =
-                "This file has changed on disk since you started editing it. Do you want to overwrite it?";
+                "自您开始编辑以来,此文件在磁盘上已发生更改,是否要覆盖它?";
 
         if save_intent == SaveIntent::Skip {
             return Ok(true);
@@ -1406,7 +1406,7 @@ impl Pane {
                     PromptLevel::Warning,
                     CONFLICT_MESSAGE,
                     None,
-                    &["Overwrite", "Discard", "Cancel"],
+                    &["覆盖", "放弃", "取消"],
                 )
             })?;
             match answer.await {
@@ -1435,7 +1435,7 @@ impl Pane {
                                 PromptLevel::Warning,
                                 &prompt,
                                 None,
-                                &["Save", "Don't Save", "Cancel"],
+                                &["保存", "不要保存", "取消"],
                             ))
                         } else {
                             None
@@ -1446,7 +1446,7 @@ impl Pane {
                         pane.update(cx, |pane, _| {
                             if !pane.save_modals_spawned.remove(&item_id) {
                                 debug_panic!(
-                                    "save modal was not present in spawned modals after awaiting for its answer"
+                                    "在等待答案后,保存模式未出现在生成的模式中"
                                 )
                             }
                         })?;
@@ -1706,7 +1706,7 @@ impl Pane {
                 if let Some(pane) = pane.upgrade() {
                     menu = menu
                         .entry(
-                            "Close",
+                            "关闭",
                             Some(Box::new(CloseActiveItem { save_intent: None })),
                             cx.handler_for(&pane, move |pane, cx| {
                                 pane.close_item_by_id(item_id, SaveIntent::Close, cx)
@@ -1714,7 +1714,7 @@ impl Pane {
                             }),
                         )
                         .entry(
-                            "Close Others",
+                            "关闭其他",
                             Some(Box::new(CloseInactiveItems { save_intent: None })),
                             cx.handler_for(&pane, move |pane, cx| {
                                 pane.close_items(cx, SaveIntent::Close, |id| id != item_id)
@@ -1723,7 +1723,7 @@ impl Pane {
                         )
                         .separator()
                         .entry(
-                            "Close Left",
+                            "关闭左侧",
                             Some(Box::new(CloseItemsToTheLeft)),
                             cx.handler_for(&pane, move |pane, cx| {
                                 pane.close_items_to_the_left_by_id(item_id, cx)
@@ -1731,7 +1731,7 @@ impl Pane {
                             }),
                         )
                         .entry(
-                            "Close Right",
+                            "关闭右侧",
                             Some(Box::new(CloseItemsToTheRight)),
                             cx.handler_for(&pane, move |pane, cx| {
                                 pane.close_items_to_the_right_by_id(item_id, cx)
@@ -1740,7 +1740,7 @@ impl Pane {
                         )
                         .separator()
                         .entry(
-                            "Close Clean",
+                            "关闭清理",
                             Some(Box::new(CloseCleanItems)),
                             cx.handler_for(&pane, move |pane, cx| {
                                 if let Some(task) = pane.close_clean_items(&CloseCleanItems, cx) {
@@ -1749,7 +1749,7 @@ impl Pane {
                             }),
                         )
                         .entry(
-                            "Close All",
+                            "关闭所有",
                             Some(Box::new(CloseAllItems { save_intent: None })),
                             cx.handler_for(&pane, |pane, cx| {
                                 if let Some(task) =
@@ -1787,7 +1787,7 @@ impl Pane {
                         menu = menu
                             .separator()
                             .entry(
-                                "Reveal In Project Panel",
+                                "在项目面板中显示",
                                 Some(Box::new(RevealInProjectPanel {
                                     entry_id: Some(entry_id),
                                 })),
@@ -1801,7 +1801,7 @@ impl Pane {
                             )
                             .when_some(parent_abs_path, |menu, abs_path| {
                                 menu.entry(
-                                    "Open in Terminal",
+                                    "在终端中打开",
                                     Some(Box::new(OpenInTerminal)),
                                     cx.handler_for(&pane, move |_, cx| {
                                         cx.dispatch_action(
@@ -1830,7 +1830,7 @@ impl Pane {
                 move |_, cx| view.update(cx, Self::navigate_backward)
             })
             .disabled(!self.can_navigate_backward())
-            .tooltip(|cx| Tooltip::for_action("Go Back", &GoBack, cx));
+            .tooltip(|cx| Tooltip::for_action("回去", &GoBack, cx));
 
         let navigate_forward = IconButton::new("navigate_forward", IconName::ArrowRight)
             .shape(IconButtonShape::Square)
@@ -1840,7 +1840,7 @@ impl Pane {
                 move |_, cx| view.update(cx, Self::navigate_forward)
             })
             .disabled(!self.can_navigate_forward())
-            .tooltip(|cx| Tooltip::for_action("Go Forward", &GoForward, cx));
+            .tooltip(|cx| Tooltip::for_action("前进", &GoForward, cx));
 
         TabBar::new("tab_bar")
             .track_scroll(self.tab_bar_scroll_handle.clone())
@@ -2047,7 +2047,7 @@ impl Pane {
             .update(cx, |workspace, cx| {
                 if workspace.project().read(cx).is_remote() {
                     workspace.show_error(
-                        &anyhow::anyhow!("Cannot drop files on a remote project"),
+                        &anyhow::anyhow!("无法将文件拖放到远程项目上"),
                         cx,
                     );
                     true
@@ -2249,7 +2249,7 @@ impl Render for Pane {
                                 placeholder
                             } else {
                                 placeholder.child(
-                                    Label::new("Open a file or project to get started.")
+                                    Label::new("打开一个文件或项目即可开始")
                                         .color(Color::Muted),
                                 )
                             }
@@ -2497,9 +2497,9 @@ fn dirty_message_for(buffer_path: Option<ProjectPath>) -> String {
                 .to_str()
                 .and_then(|s| if s == "" { None } else { Some(s) })
         })
-        .unwrap_or("This buffer");
+        .unwrap_or("此缓冲区");
     let path = truncate_and_remove_front(path, 80);
-    format!("{path} contains unsaved edits. Do you want to save it?")
+    format!("{path} 包含未保存的编辑,是否要保存?")
 }
 
 pub fn tab_details(items: &Vec<Box<dyn ItemHandle>>, cx: &AppContext) -> Vec<usize> {
@@ -3087,7 +3087,7 @@ mod tests {
 
             assert_eq!(
                 actual_states, expected_states,
-                "pane items do not match expectation"
+                "窗格项目与预期不符"
             );
         })
     }
