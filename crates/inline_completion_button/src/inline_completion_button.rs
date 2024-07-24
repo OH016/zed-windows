@@ -79,7 +79,7 @@ impl Render for InlineCompletionButton {
 
                 if let Status::Error(e) = status {
                     return div().child(
-                        IconButton::new("copilot-error", icon)
+                        IconButton::new("copilot 错误", icon)
                             .icon_size(IconSize::Small)
                             .on_click(cx.listener(move |_, _, cx| {
                                 if let Some(workspace) = cx.window_handle().downcast::<Workspace>()
@@ -89,9 +89,9 @@ impl Render for InlineCompletionButton {
                                             workspace.show_toast(
                                                 Toast::new(
                                                     NotificationId::unique::<CopilotErrorToast>(),
-                                                    format!("Copilot can't be started: {}", e),
+                                                    format!("Copilot 无法启动: {}", e),
                                                 )
-                                                .on_click("Reinstall Copilot", |cx| {
+                                                .on_click("重新安装 Copilot", |cx| {
                                                     if let Some(copilot) = Copilot::global(cx) {
                                                         copilot
                                                             .update(cx, |copilot, cx| {
@@ -123,7 +123,7 @@ impl Render for InlineCompletionButton {
                         })
                         .anchor(AnchorCorner::BottomRight)
                         .trigger(
-                            IconButton::new("copilot-icon", icon)
+                            IconButton::new("copilot 图标", icon)
                                 .tooltip(|cx| Tooltip::text("GitHub Copilot", cx)),
                         ),
                 )
@@ -166,7 +166,7 @@ impl Render for InlineCompletionButton {
                             SupermavenButtonStatus::NeedsActivation(activate_url) => {
                                 Some(ContextMenu::build(cx, |menu, _| {
                                     let activate_url = activate_url.clone();
-                                    menu.entry("Sign In", None, move |cx| {
+                                    menu.entry("登录", None, move |cx| {
                                         cx.open_url(activate_url.as_str())
                                     })
                                 }))
@@ -178,7 +178,7 @@ impl Render for InlineCompletionButton {
                         })
                         .anchor(AnchorCorner::BottomRight)
                         .trigger(
-                            IconButton::new("supermaven-icon", icon)
+                            IconButton::new("supermaven 图标", icon)
                                 .tooltip(move |cx| Tooltip::text(tooltip_text.clone(), cx)),
                         ),
                 );
@@ -208,8 +208,8 @@ impl InlineCompletionButton {
     pub fn build_copilot_start_menu(&mut self, cx: &mut ViewContext<Self>) -> View<ContextMenu> {
         let fs = self.fs.clone();
         ContextMenu::build(cx, |menu, _| {
-            menu.entry("Sign In", None, initiate_sign_in).entry(
-                "Disable Copilot",
+            menu.entry("登录", None, initiate_sign_in).entry(
+                "禁用 Copilot",
                 None,
                 move |cx| hide_copilot(fs.clone(), cx),
             )
@@ -230,8 +230,8 @@ impl InlineCompletionButton {
 
             menu = menu.entry(
                 format!(
-                    "{} Inline Completions for {}",
-                    if language_enabled { "Hide" } else { "Show" },
+                    "{} 联想补全 {}",
+                    if language_enabled { "隐藏" } else { "显示" },
                     language.name()
                 ),
                 None,
@@ -247,8 +247,8 @@ impl InlineCompletionButton {
 
             menu = menu.entry(
                 format!(
-                    "{} Inline Completions for This Path",
-                    if path_enabled { "Hide" } else { "Show" }
+                    "{} 该路径的联想补全",
+                    if path_enabled { "隐藏" } else { "显示" }
                 ),
                 None,
                 move |cx| {
@@ -272,9 +272,9 @@ impl InlineCompletionButton {
         let globally_enabled = settings.inline_completions_enabled(None, None);
         menu.entry(
             if globally_enabled {
-                "Hide Inline Completions for All Files"
+                "隐藏所有文件的联想补全"
             } else {
-                "Show Inline Completions for All Files"
+                "显示所有文件的内联补全"
             },
             None,
             move |cx| toggle_inline_completions_globally(fs.clone(), cx),
@@ -286,13 +286,13 @@ impl InlineCompletionButton {
             self.build_language_settings_menu(menu, cx)
                 .separator()
                 .link(
-                    "Go to Copilot Settings",
+                    "转到 Copilot 设置",
                     OpenBrowser {
                         url: COPILOT_SETTINGS_URL.to_string(),
                     }
                     .boxed_clone(),
                 )
-                .action("Sign Out", copilot::SignOut.boxed_clone())
+                .action("登出", copilot::SignOut.boxed_clone())
         })
     }
 
@@ -300,7 +300,7 @@ impl InlineCompletionButton {
         ContextMenu::build(cx, |menu, cx| {
             self.build_language_settings_menu(menu, cx)
                 .separator()
-                .action("Sign Out", supermaven::SignOut.boxed_clone())
+                .action("登出", supermaven::SignOut.boxed_clone())
         })
     }
 
@@ -356,10 +356,10 @@ impl SupermavenButtonStatus {
 
     fn to_tooltip(&self) -> String {
         match self {
-            SupermavenButtonStatus::Ready => "Supermaven is ready".to_string(),
-            SupermavenButtonStatus::Errored(error) => format!("Supermaven error: {}", error),
-            SupermavenButtonStatus::NeedsActivation(_) => "Supermaven needs activation".to_string(),
-            SupermavenButtonStatus::Initializing => "Supermaven initializing".to_string(),
+            SupermavenButtonStatus::Ready => "Supermaven 就绪".to_string(),
+            SupermavenButtonStatus::Errored(error) => format!("Supermaven 错误: {}", error),
+            SupermavenButtonStatus::NeedsActivation(_) => "Supermaven 需要激活".to_string(),
+            SupermavenButtonStatus::Initializing => "Supermaven 初始化".to_string(),
         }
     }
 }
@@ -466,7 +466,7 @@ pub fn initiate_sign_in(cx: &mut WindowContext) {
                 workspace.show_toast(
                     Toast::new(
                         NotificationId::unique::<CopilotStartingToast>(),
-                        "Copilot is starting...",
+                        "Copilot 正在启动...",
                     ),
                     cx,
                 );
@@ -483,7 +483,7 @@ pub fn initiate_sign_in(cx: &mut WindowContext) {
                             Status::Authorized => workspace.show_toast(
                                 Toast::new(
                                     NotificationId::unique::<CopilotStartingToast>(),
-                                    "Copilot has started!",
+                                    "Copilot 已启动!",
                                 ),
                                 cx,
                             ),
