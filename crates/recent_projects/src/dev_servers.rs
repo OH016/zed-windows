@@ -88,11 +88,11 @@ impl DevServerProjects {
     pub fn new(cx: &mut ViewContext<Self>, workspace: WeakView<Workspace>) -> Self {
         let project_path_input = cx.new_view(|cx| {
             let mut editor = Editor::single_line(cx);
-            editor.set_placeholder_text("Project path (~/work/zed, /workspace/zed, …)", cx);
+            editor.set_placeholder_text("项目路径 (~/work/zed, /workspace/zed, …)", cx);
             editor
         });
         let dev_server_name_input = cx.new_view(|cx| {
-            TextField::new(cx, "Name", "192.168.0.1").with_label(FieldLabelLayout::Hidden)
+            TextField::new(cx, "名字", "192.168.0.1").with_label(FieldLabelLayout::Hidden)
         });
 
         let focus_handle = cx.focus_handle();
@@ -166,9 +166,9 @@ impl DevServerProjects {
             cx.spawn(|_, mut cx| async move {
                 cx.prompt(
                     gpui::PromptLevel::Critical,
-                    "Failed to create project",
-                    Some(&format!("{} is already open on this dev server.", path)),
-                    &["Ok"],
+                    "无法创建项目",
+                    Some(&format!("{} 已在此开发服务器上打开", path)),
+                    &["就绪"],
                 )
                 .await
             })
@@ -210,7 +210,7 @@ impl DevServerProjects {
                                             cx,
                                         )
                                         .detach_and_prompt_err(
-                                            "Could not join project",
+                                            "无法加入项目",
                                             cx,
                                             |_, _| None,
                                         )
@@ -235,14 +235,14 @@ impl DevServerProjects {
             .log_err();
             result
         })
-        .detach_and_prompt_err("Failed to create project", cx, move |e, _| {
+        .detach_and_prompt_err("无法创建项目", cx, move |e, _| {
             match e.error_code() {
                 ErrorCode::DevServerOffline => Some(
-                    "The dev server is offline. Please log in and check it is connected."
+                    "开发服务器处于脱机状态,请登录并检查它是否已连接"
                         .to_string(),
                 ),
                 ErrorCode::DevServerProjectPathDoesNotExist => {
-                    Some(format!("The path `{}` does not exist on the server.", path))
+                    Some(format!("服务器上不存在路径`{}`", path))
                 }
                 _ => None,
             }
@@ -272,7 +272,7 @@ impl DevServerProjects {
         } else if name.contains(' ') {
             Some(name.clone())
         } else {
-            Some(format!("ssh {}", name))
+            Some(format!("SSH {}", name))
         };
 
         let dev_server = self.dev_server_store.update(cx, {
@@ -337,7 +337,7 @@ impl DevServerProjects {
                                 spawn_ssh_task(
                                     workspace
                                         .upgrade()
-                                        .ok_or_else(|| anyhow!("workspace dropped"))?,
+                                        .ok_or_else(|| anyhow!("工作区已删除"))?,
                                     store,
                                     DevServerId(dev_server.dev_server_id),
                                     ssh_connection_string,
@@ -377,7 +377,7 @@ impl DevServerProjects {
                     }
                 }
             })
-            .prompt_err("Failed to create server", cx, |_, _| None);
+            .prompt_err("创建服务器失败", cx, |_, _| None);
 
         self.mode = Mode::CreateDevServer(CreateDevServer {
             creating: Some(task),
@@ -399,9 +399,9 @@ impl DevServerProjects {
         } else {
             Some(cx.prompt(
                 gpui::PromptLevel::Warning,
-                "Are you sure?",
-                Some("This will delete the dev server and all of its remote projects."),
-                &["Delete", "Cancel"],
+                "是否确定?",
+                Some("这将删除开发服务器及其所有远程项目"),
+                &["删除", "取消"],
             ))
         };
 
@@ -436,15 +436,15 @@ impl DevServerProjects {
             }
             Ok(())
         })
-        .detach_and_prompt_err("Failed to delete dev server", cx, |_, _| None);
+        .detach_and_prompt_err("无法删除开发服务器", cx, |_, _| None);
     }
 
     fn delete_dev_server_project(&mut self, id: DevServerProjectId, cx: &mut ViewContext<Self>) {
         let answer = cx.prompt(
             gpui::PromptLevel::Warning,
-            "Delete this project?",
-            Some("This will delete the remote project. You can always re-add it later."),
-            &["Delete", "Cancel"],
+            "删除此项目?",
+            Some("这将删除远程项目,您可以随时重新添加它"),
+            &["删除", "取消"],
         );
 
         cx.spawn(|this, mut cx| async move {
@@ -467,7 +467,7 @@ impl DevServerProjects {
 
             Ok(())
         })
-        .detach_and_prompt_err("Failed to delete dev server project", cx, |_, _| None);
+        .detach_and_prompt_err("无法删除开发服务器项目", cx, |_, _| None);
     }
 
     fn confirm(&mut self, _: &menu::Confirm, cx: &mut ViewContext<Self>) {
@@ -514,12 +514,12 @@ impl DevServerProjects {
         v_flex()
             .w_full()
             .child(
-                h_flex().group("dev-server").justify_between().child(
+                h_flex().group("开发服务器").justify_between().child(
                     h_flex()
                         .gap_2()
                         .child(
                             div()
-                                .id(("status", dev_server.id.0))
+                                .id(("状态", dev_server.id.0))
                                 .relative()
                                 .child(Icon::new(IconName::Server).size(IconSize::Small))
                                 .child(div().absolute().bottom_0().left(rems_from_px(8.0)).child(
@@ -531,8 +531,8 @@ impl DevServerProjects {
                                 .tooltip(move |cx| {
                                     Tooltip::text(
                                         match status {
-                                            DevServerStatus::Online => "Online",
-                                            DevServerStatus::Offline => "Offline",
+                                            DevServerStatus::Online => "在线",
+                                            DevServerStatus::Offline => "离线",
                                         },
                                         cx,
                                     )
@@ -547,11 +547,11 @@ impl DevServerProjects {
                         )
                         .child(
                             h_flex()
-                                .visible_on_hover("dev-server")
+                                .visible_on_hover("开发服务器")
                                 .gap_1()
                                 .child(if dev_server.ssh_connection_string.is_some() {
                                     let dev_server = dev_server.clone();
-                                    IconButton::new("reconnect-dev-server", IconName::ArrowCircle)
+                                    IconButton::new("重新连接开发服务器", IconName::ArrowCircle)
                                         .on_click(cx.listener(move |this, _, cx| {
                                             let Some(workspace) = this.workspace.upgrade() else {
                                                 return;
@@ -563,14 +563,14 @@ impl DevServerProjects {
                                                 cx,
                                             )
                                             .detach_and_prompt_err(
-                                                "Failed to reconnect",
+                                                "无法重新连接",
                                                 cx,
                                                 |_, _| None,
                                             );
                                         }))
-                                        .tooltip(|cx| Tooltip::text("Reconnect", cx))
+                                        .tooltip(|cx| Tooltip::text("重新", cx))
                                 } else {
-                                    IconButton::new("edit-dev-server", IconName::Pencil)
+                                    IconButton::new("编辑开发服务器", IconName::Pencil)
                                         .on_click(cx.listener(move |this, _, cx| {
                                             this.mode = Mode::CreateDevServer(CreateDevServer {
                                                 dev_server_id: Some(dev_server_id),
@@ -588,15 +588,15 @@ impl DevServerProjects {
                                                 },
                                             )
                                         }))
-                                        .tooltip(|cx| Tooltip::text("Edit dev server", cx))
+                                        .tooltip(|cx| Tooltip::text("编辑开发服务器", cx))
                                 })
                                 .child({
                                     let dev_server_id = dev_server.id;
-                                    IconButton::new("remove-dev-server", IconName::Trash)
+                                    IconButton::new("删除开发服务器", IconName::Trash)
                                         .on_click(cx.listener(move |this, _, cx| {
                                             this.delete_dev_server(dev_server_id, cx)
                                         }))
-                                        .tooltip(|cx| Tooltip::text("Remove dev server", cx))
+                                        .tooltip(|cx| Tooltip::text("删除开发服务器", cx))
                                 }),
                         ),
                 ),
@@ -613,7 +613,7 @@ impl DevServerProjects {
                     .px_3()
                     .child(
                         List::new()
-                            .empty_message("No projects.")
+                            .empty_message("没有项目")
                             .children(
                                 self.dev_server_store
                                     .read(cx)
@@ -626,9 +626,9 @@ impl DevServerProjects {
                                     && dev_server.status == DevServerStatus::Online,
                                 |el| {
                                     el.child(
-                                        ListItem::new("new-remote_project")
+                                        ListItem::new("新的远程项目")
                                             .start_slot(Icon::new(IconName::Plus))
-                                            .child(Label::new("Open folder…"))
+                                            .child(Label::new("打开文件夹..."))
                                             .on_click(cx.listener(move |this, _, cx| {
                                                 this.mode =
                                                     Mode::Default(Some(CreateDevServerProject {
@@ -657,7 +657,7 @@ impl DevServerProjects {
         creating: bool,
         _: &mut ViewContext<Self>,
     ) -> impl IntoElement {
-        ListItem::new("create-remote-project")
+        ListItem::new("创建远程项目")
             .disabled(true)
             .start_slot(Icon::new(IconName::FileTree).color(Color::Muted))
             .child(self.project_path_input.clone())
@@ -683,7 +683,7 @@ impl DevServerProjects {
         let project_id = project.project_id;
         let is_online = project_id.is_some();
 
-        ListItem::new(("remote-project", dev_server_project_id.0))
+        ListItem::new(("远程项目", dev_server_project_id.0))
             .start_slot(Icon::new(IconName::FileTree).when(!is_online, |icon| icon.color(Color::Muted)))
             .child(
                     Label::new(project.paths.join(", "))
@@ -692,19 +692,19 @@ impl DevServerProjects {
                 if let Some(project_id) = project_id {
                     if let Some(app_state) = AppState::global(cx).upgrade() {
                         workspace::join_dev_server_project(dev_server_project_id, project_id, app_state, None, cx)
-                            .detach_and_prompt_err("Could not join project", cx, |_, _| None)
+                            .detach_and_prompt_err("无法加入项目", cx, |_, _| None)
                     }
                 } else {
                     cx.spawn(|_, mut cx| async move {
-                        cx.prompt(gpui::PromptLevel::Critical, "This project is offline", Some("The `zed` instance running on this dev server is not connected. You will have to restart it."), &["Ok"]).await.log_err();
+                        cx.prompt(gpui::PromptLevel::Critical, "此项目处于离线状态", Some("在此开发服务器上运行的`zed`实例未连接。您将必须重新启动它"), &["就绪"]).await.log_err();
                     }).detach();
                 }
             }))
-            .end_hover_slot::<AnyElement>(Some(IconButton::new("remove-remote-project", IconName::Trash)
+            .end_hover_slot::<AnyElement>(Some(IconButton::new("删除远程项目", IconName::Trash)
                 .on_click(cx.listener(move |this, _, cx| {
                     this.delete_dev_server_project(dev_server_project_id, cx)
                 }))
-                .tooltip(|cx| Tooltip::text("Delete remote project", cx)).into_any_element()))
+                .tooltip(|cx| Tooltip::text("删除远程项目", cx)).into_any_element()))
     }
 
     fn render_create_dev_server(
@@ -725,30 +725,30 @@ impl DevServerProjects {
             input.editor().update(cx, |editor, cx| {
                 if editor.text(cx).is_empty() {
                     if manual_setup {
-                        editor.set_placeholder_text("example-server", cx)
+                        editor.set_placeholder_text("示例服务器", cx)
                     } else {
-                        editor.set_placeholder_text("ssh host", cx)
+                        editor.set_placeholder_text("SSH主机", cx)
                     }
                 }
                 editor.text(cx)
             })
         });
 
-        const MANUAL_SETUP_MESSAGE: &str = "Click create to generate a token for this server. The next step will provide instructions for setting zed up on that machine.";
-        const SSH_SETUP_MESSAGE: &str = "Enter the command you use to ssh into this server.\nFor example: `ssh me@my.server` or `gh cs ssh -c example`.";
+        const MANUAL_SETUP_MESSAGE: &str = "单击创建以生成此服务器的令牌,下一步将提供有关在该计算机上设置 zed 的说明";
+        const SSH_SETUP_MESSAGE: &str = "输入用于通过 ssh 连接到此服务器的命令\n例如: `ssh me@my.server`或`gh cs ssh -c example`";
 
-        Modal::new("create-dev-server", Some(self.scroll_handle.clone()))
+        Modal::new("创建开发服务器", Some(self.scroll_handle.clone()))
             .header(
                 ModalHeader::new()
-                    .headline("Create Dev Server")
+                    .headline("创建开发服务器")
                     .show_back_button(true),
             )
             .section(
                 Section::new()
                     .header(if manual_setup {
-                        "Server Name".into()
+                        "服务器名称".into()
                     } else {
-                        "SSH arguments".into()
+                        "SSH 参数".into()
                     })
                     .child(
                         div()
@@ -758,7 +758,7 @@ impl DevServerProjects {
             )
             .section(
                 Section::new_contained()
-                    .header("Connection Method".into())
+                    .header("连接方式".into())
                     .child(
                         v_flex()
                             .w_full()
@@ -766,8 +766,8 @@ impl DevServerProjects {
                             .child(
                                 v_flex()
                                     .child(RadioWithLabel::new(
-                                        "use-server-name-in-ssh",
-                                        Label::new("Connect via SSH (default)"),
+                                        "使用服务器名称 - 在 SSH 中",
+                                        Label::new("通过 SSH 连接（默认）"),
                                         !manual_setup,
                                         cx.listener({
                                             move |this, _, cx| {
@@ -783,8 +783,8 @@ impl DevServerProjects {
                                         }),
                                     ))
                                     .child(RadioWithLabel::new(
-                                        "use-server-name-in-ssh",
-                                        Label::new("Manual Setup"),
+                                        "使用服务器名称 - 在 SSH 中",
+                                        Label::new("手动设置"),
                                         manual_setup,
                                         cx.listener({
                                             move |this, _, cx| {
@@ -815,12 +815,12 @@ impl DevServerProjects {
                                 el.child(
                                     if manual_setup {
                                         Label::new(
-                                            "Note: updating the dev server generate a new token",
+                                            "注意：更新开发服务器会生成新的令牌",
                                         )
                                     } else {
                                         Label::new(
-                                            "Enter the command you use to ssh into this server.\n\
-                                        For example: `ssh me@my.server` or `gh cs ssh -c example`.",
+                                            "输入用于通过 ssh 连接到此服务器的命令\n
+                                            例如:`ssh me@my.server`或`gh cs ssh -c example`",
                                         )
                                     }
                                     .size(LabelSize::Small)
@@ -843,7 +843,7 @@ impl DevServerProjects {
             )
             .footer(
                 ModalFooter::new().end_slot(if status == DevServerStatus::Online {
-                    Button::new("create-dev-server", "Done")
+                    Button::new("创建开发服务器", "完成")
                         .style(ButtonStyle::Filled)
                         .layer(ElevationIndex::ModalSurface)
                         .on_click(cx.listener(move |this, _, cx| {
@@ -853,18 +853,18 @@ impl DevServerProjects {
                         }))
                 } else {
                     Button::new(
-                        "create-dev-server",
+                        "创建开发服务器",
                         if manual_setup {
                             if dev_server_id.is_some() {
-                                "Update"
+                                "更新"
                             } else {
-                                "Create"
+                                "创建"
                             }
                         } else {
                             if dev_server_id.is_some() {
-                                "Reconnect"
+                                "重试"
                             } else {
-                                "Connect"
+                                "连接"
                             }
                         },
                     )
@@ -897,9 +897,9 @@ impl DevServerProjects {
     ) -> Div {
         self.markdown.update(cx, |markdown, cx| {
             if manual_setup {
-                markdown.reset(format!("Please log into '{}'. If you don't yet have zed installed, run:\n```\ncurl https://zed.dev/install.sh | bash\n```\nThen to start zed in headless mode:\n```\nzed --dev-server-token {}\n```", dev_server_name, access_token), cx);
+                markdown.reset(format!("请登录 '{}' 如果您尚未安装 zed,运行:\n```\ncurl https://zed.dev/install.sh | bash\n```\n然后以无头模式启动zed:\n```\nzed --dev-server-token {}\n```", dev_server_name, access_token), cx);
             } else {
-                markdown.reset("Please wait while we connect over SSH.\n\nIf you run into problems, please [file a bug](https://github.com/zed-industries/zed), and in the meantime try using manual setup.".to_string(), cx);
+                markdown.reset("请稍候,我们将通过 SSH 进行连接\n\n如果您遇到问题,请[提出错误](https://github.com/zed-industries/zed),同时尝试使用手动设置".to_string(), cx);
             }
         });
 
@@ -914,12 +914,12 @@ impl DevServerProjects {
                         h_flex()
                             .gap_2()
                             .child(Icon::new(IconName::Disconnected).size(IconSize::Medium))
-                            .child(Label::new("Not connected")),
+                            .child(Label::new("未连接")),
                     )
                 } else if status == DevServerStatus::Offline {
-                    el.child(Self::render_loading_spinner("Waiting for connection…"))
+                    el.child(Self::render_loading_spinner("等待连接..."))
                 } else {
-                    el.child(Label::new("🎊 Connection established!"))
+                    el.child(Label::new("🎊 连接已建立！"))
                 }
             })
     }
@@ -959,20 +959,20 @@ impl DevServerProjects {
         };
         let is_signed_out = Client::global(cx).status().borrow().is_signed_out();
 
-        Modal::new("remote-projects", Some(self.scroll_handle.clone()))
+        Modal::new("远程项目", Some(self.scroll_handle.clone()))
             .header(
                 ModalHeader::new()
                     .show_dismiss_button(true)
-                    .child(Headline::new("Remote Projects (alpha)").size(HeadlineSize::Small)),
+                    .child(Headline::new("远程项目 (alpha)").size(HeadlineSize::Small)),
             )
             .when(is_signed_out, |modal| {
                 modal
                     .section(Section::new().child(v_flex().mb_4().child(Label::new(
-                        "You are not currently signed in to Zed. Currently the remote development featuers are only available to signed in users. Please sign in to continue.",
+                        "您目前尚未登录 Zed,目前只有已登录的用户才能使用远程开发功能,请登录以继续",
                     ))))
                     .footer(
                         ModalFooter::new().end_slot(
-                            Button::new("sign_in", "Sign in")
+                            Button::new("登录", "登录")
                                 .icon(IconName::Github)
                                 .icon_position(IconPosition::Start)
                                 .style(ButtonStyle::Filled)
@@ -996,14 +996,14 @@ impl DevServerProjects {
                     Section::new().child(
                         div().mb_4().child(
                             List::new()
-                                .empty_message("No dev servers registered.")
+                                .empty_message("未注册开发服务器")
                                 .header(Some(
-                                    ListHeader::new("Dev Servers").end_slot(
-                                        Button::new("register-dev-server-button", "New Server")
+                                    ListHeader::new("开发服务器").end_slot(
+                                        Button::new("注册开发服务器按钮", "新增服务器")
                                             .icon(IconName::Plus)
                                             .icon_position(IconPosition::Start)
                                             .tooltip(|cx| {
-                                                Tooltip::text("Register a new dev server", cx)
+                                                Tooltip::text("注册新的开发服务器", cx)
                                             })
                                             .on_click(cx.listener(|this, _, cx| {
                                                 this.mode = Mode::CreateDevServer(
@@ -1065,7 +1065,7 @@ impl Render for DevServerProjects {
         div()
             .track_focus(&self.focus_handle)
             .elevation_3(cx)
-            .key_context("DevServerModal")
+            .key_context("开发服务器模式")
             .on_action(cx.listener(Self::cancel))
             .on_action(cx.listener(Self::confirm))
             .capture_any_mouse_down(cx.listener(|this, _, cx| {
@@ -1130,7 +1130,7 @@ pub fn reconnect_to_dev_server(
     cx: &mut WindowContext,
 ) -> Task<anyhow::Result<()>> {
     let Some(ssh_connection_string) = dev_server.ssh_connection_string else {
-        return Task::ready(Err(anyhow!("can't reconnect, no ssh_connection_string")));
+        return Task::ready(Err(anyhow!("无法重新连接,没有 ssh_connection_string")));
     };
     let dev_server_store = dev_server_projects::Store::global(cx);
     let get_access_token = dev_server_store.update(cx, |store, cx| {
@@ -1164,7 +1164,7 @@ pub async fn spawn_ssh_task(
         .update(cx, |workspace, cx| workspace.panel::<TerminalPanel>(cx))
         .ok()
         .flatten()
-        .with_context(|| anyhow!("No terminal panel"))?;
+        .with_context(|| anyhow!("无终端面板"))?;
 
     let command = "sh".to_string();
     let args = vec![
@@ -1183,8 +1183,8 @@ pub async fn spawn_ssh_task(
             terminal_panel.spawn_in_new_terminal(
                 SpawnInTerminal {
                     id: task::TaskId("ssh-remote".into()),
-                    full_label: "Install zed over ssh".into(),
-                    label: "Install zed over ssh".into(),
+                    full_label: "通过 ssh 安装 zed".into(),
+                    label: "通过 ssh 安装 zed".into(),
                     command,
                     args,
                     command_label: ssh_connection_string.clone(),
@@ -1220,7 +1220,7 @@ pub async fn spawn_ssh_task(
     if dev_server_store.update(cx, |this, _| this.dev_server_status(dev_server_id))?
         == DevServerStatus::Offline
     {
-        return Err(anyhow!("couldn't reconnect"))?;
+        return Err(anyhow!("无法重新连接"))?;
     }
 
     Ok(())
