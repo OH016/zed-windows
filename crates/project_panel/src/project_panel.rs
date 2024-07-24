@@ -2600,7 +2600,7 @@ impl Panel for ProjectPanel {
     }
 
     fn icon_tooltip(&self, _cx: &WindowContext) -> Option<&'static str> {
-        Some("Project Panel")
+        Some("项目面板")
     }
 
     fn toggle_action(&self) -> Box<dyn Action> {
@@ -2608,7 +2608,7 @@ impl Panel for ProjectPanel {
     }
 
     fn persistent_name() -> &'static str {
-        "Project Panel"
+        "项目面板"
     }
 
     fn starts_open(&self, cx: &WindowContext) -> bool {
