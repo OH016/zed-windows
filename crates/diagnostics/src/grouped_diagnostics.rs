@@ -113,7 +113,7 @@ impl Render for GroupedDiagnosticsEditor {
                 .items_center()
                 .justify_center()
                 .size_full()
-                .child(Label::new("No problems in workspace"))
+                .child(Label::new("工作区没有问题"))
         } else {
             div().size_full().child(self.editor.clone())
         };
@@ -146,7 +146,7 @@ impl GroupedDiagnosticsEditor {
                     cx.notify();
                 }
                 project::Event::DiskBasedDiagnosticsFinished { language_server_id } => {
-                    log::debug!("disk based diagnostics finished for server {language_server_id}");
+                    log::debug!("已完成基于磁盘的服务器检查 {language_server_id}");
                     this.enqueue_update_stale_excerpts(Some(*language_server_id));
                 }
                 project::Event::DiagnosticsUpdated {
@@ -159,9 +159,9 @@ impl GroupedDiagnosticsEditor {
                     cx.emit(EditorEvent::TitleChanged);
 
                     if this.editor.focus_handle(cx).contains_focused(cx) || this.focus_handle.contains_focused(cx) {
-                        log::debug!("diagnostics updated for server {language_server_id}, path {path:?}. recording change");
+                        log::debug!("已更新服务器检查程序 {language_server_id}, 路径 {path:?}. 变更");
                     } else {
-                        log::debug!("diagnostics updated for server {language_server_id}, path {path:?}. updating excerpts");
+                        log::debug!("已更新服务器检查程序 {language_server_id}, 路径 {path:?}. 更新");
                         this.enqueue_update_stale_excerpts(Some(*language_server_id));
                     }
                 }
@@ -428,7 +428,7 @@ impl GroupedDiagnosticsEditor {
         for (_, path) in &excerpts {
             if let Some(prev_path) = prev_path {
                 if path < prev_path {
-                    panic!("excerpts are not sorted by path {:?}", excerpts);
+                    panic!("摘录未按路径排序 {:?}", excerpts);
                 }
             }
             prev_path = Some(path);
@@ -459,12 +459,12 @@ impl Item for GroupedDiagnosticsEditor {
     }
 
     fn tab_tooltip_text(&self, _: &AppContext) -> Option<SharedString> {
-        Some("Project Diagnostics".into())
+        Some("项目问题".into())
     }
 
     fn tab_content(&self, params: TabContentParams, _: &WindowContext) -> AnyElement {
         if self.summary.error_count == 0 && self.summary.warning_count == 0 {
-            Label::new("No problems")
+            Label::new("没问题")
                 .color(params.text_color())
                 .into_any_element()
         } else {
@@ -497,7 +497,7 @@ impl Item for GroupedDiagnosticsEditor {
     }
 
     fn telemetry_event_text(&self) -> Option<&'static str> {
-        Some("project diagnostics")
+        Some("项目检查")
     }
 
     fn for_each_project_item(
@@ -1243,7 +1243,7 @@ impl PathUpdate {
             let mut created_block_id = None;
             match grouped_diagnostics.len() {
                 0 => {
-                    debug_panic!("Unexpected empty diagnostics group");
+                    debug_panic!("检查组意外为空");
                     continue;
                 }
                 1 => {
@@ -1254,7 +1254,7 @@ impl PathUpdate {
                         let Some(block_id) =
                             created_block_id.get_or_insert_with(|| new_block_ids.next())
                         else {
-                            debug_panic!("Expected a new block for each new diagnostic");
+                            debug_panic!("预计每个新检查都会有一个新的区块");
                             continue;
                         };
                         self.new_diagnostics[index].1 = Some(*block_id);
@@ -1264,7 +1264,7 @@ impl PathUpdate {
                     let Some(block_id) =
                         created_block_id.get_or_insert_with(|| new_block_ids.next())
                     else {
-                        debug_panic!("Expected a new block for each new diagnostic group");
+                        debug_panic!("预计每个新检查组都会有一个新的区块");
                         continue;
                     };
                     for i in grouped_diagnostics {
@@ -1291,12 +1291,12 @@ fn render_same_line_diagnostics(
         let block_id = match cx.block_id {
             BlockId::Custom(block_id) => block_id,
             _ => {
-                debug_panic!("Expected a block id for the diagnostics block");
+                debug_panic!("检查块需要块 ID");
                 return div().into_any_element();
             }
         };
         let Some(first_diagnostic) = diagnostics.first() else {
-            debug_panic!("Expected at least one diagnostic");
+            debug_panic!("预计至少有一项检查");
             return div().into_any_element();
         };
         let button_expanded = expanded.clone();

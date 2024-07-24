@@ -62,10 +62,10 @@ impl Render for DiagnosticIndicator {
         let status = if let Some(diagnostic) = &self.current_diagnostic {
             let message = diagnostic.message.split('\n').next().unwrap().to_string();
             Some(
-                Button::new("diagnostic_message", message)
+                Button::new("检查消息", message)
                     .label_size(LabelSize::Small)
                     .tooltip(|cx| {
-                        Tooltip::for_action("Next Diagnostic", &editor::actions::GoToDiagnostic, cx)
+                        Tooltip::for_action("下一步检查", &editor::actions::GoToDiagnostic, cx)
                     })
                     .on_click(cx.listener(|this, _, cx| {
                         this.go_to_next_diagnostic(cx);
@@ -82,7 +82,7 @@ impl Render for DiagnosticIndicator {
             .child(
                 ButtonLike::new("diagnostic-indicator")
                     .child(diagnostic_indicator)
-                    .tooltip(|cx| Tooltip::for_action("Project Diagnostics", &Deploy, cx))
+                    .tooltip(|cx| Tooltip::for_action("项目问题", &Deploy, cx))
                     .on_click(cx.listener(|this, _, cx| {
                         if let Some(workspace) = this.workspace.upgrade() {
                             workspace.update(cx, |workspace, cx| {
