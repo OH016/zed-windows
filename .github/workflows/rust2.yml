@@ -1,0 +1,32 @@
+name: rust2
+
+on:
+  workflow_dispatch:
+  
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-and-upload:
+
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          clean: false
+
+      - name: Cache dependencies
+        uses: swatinem/rust-cache@v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build Zed
+        run: cargo build -p zed
+          
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: Zed.exe
+          path: target/x86_64-pc-windows-msvc/release/zed.exe
