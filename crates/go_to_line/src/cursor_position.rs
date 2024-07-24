@@ -136,7 +136,7 @@ impl Render for CursorPosition {
                     }))
                     .tooltip(|cx| {
                         Tooltip::for_action(
-                            "Go to Line/Column",
+                            "转到行/列",
                             &editor::actions::ToggleGoToLine,
                             cx,
                         )
