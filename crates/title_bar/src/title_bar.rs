@@ -286,7 +286,7 @@ impl TitleBar {
 
         if self.project.read(cx).is_disconnected() {
             return Some(
-                Button::new("disconnected", "Disconnected")
+                Button::new("disconnected", "断开")
                     .disabled(true)
                     .color(Color::Disabled)
                     .style(ButtonStyle::Subtle)
@@ -462,12 +462,12 @@ impl TitleBar {
             client::Status::UpgradeRequired => {
                 let auto_updater = auto_update::AutoUpdater::get(cx);
                 let label = match auto_updater.map(|auto_update| auto_update.read(cx).status()) {
-                    Some(AutoUpdateStatus::Updated { .. }) => "Please restart Zed to Collaborate",
+                    Some(AutoUpdateStatus::Updated { .. }) => "请重新启动 Zed 进行协作",
                     Some(AutoUpdateStatus::Installing)
                     | Some(AutoUpdateStatus::Downloading)
-                    | Some(AutoUpdateStatus::Checking) => "Updating...",
+                    | Some(AutoUpdateStatus::Checking) => "更新...",
                     Some(AutoUpdateStatus::Idle) | Some(AutoUpdateStatus::Errored) | None => {
-                        "Please update Zed to Collaborate"
+                        "请更新 Zed 以进行协作"
                     }
                 };
 
@@ -492,7 +492,7 @@ impl TitleBar {
 
     pub fn render_sign_in_button(&mut self, _: &mut ViewContext<Self>) -> Button {
         let client = self.client.clone();
-        Button::new("sign_in", "Sign in")
+        Button::new("登录", "登录")
             .label_size(LabelSize::Small)
             .on_click(move |_, cx| {
                 let client = client.clone();
