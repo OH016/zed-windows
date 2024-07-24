@@ -60,7 +60,7 @@ struct ChannelMoveClipboard {
     channel_id: ChannelId,
 }
 
-const COLLABORATION_PANEL_KEY: &str = "CollaborationPanel";
+const COLLABORATION_PANEL_KEY: &str = "协作面板";
 
 pub fn init(cx: &mut AppContext) {
     cx.observe_new_views(|workspace: &mut Workspace, _| {
@@ -198,7 +198,7 @@ impl CollabPanel {
         cx.new_view(|cx| {
             let filter_editor = cx.new_view(|cx| {
                 let mut editor = Editor::single_line(cx);
-                editor.set_placeholder_text("Filter...", cx);
+                editor.set_placeholder_text("过滤...", cx);
                 editor
             });
 
@@ -313,7 +313,7 @@ impl CollabPanel {
             .background_executor()
             .spawn(async move { KEY_VALUE_STORE.read_kvp(COLLABORATION_PANEL_KEY) })
             .await
-            .map_err(|_| anyhow::anyhow!("Failed to read collaboration panel from key value store"))
+            .map_err(|_| anyhow::anyhow!("无法从键值存储中读取协作面板"))
             .log_err()
             .flatten()
             .map(|panel| serde_json::from_str::<SerializedCollabPanel>(&panel))
@@ -842,7 +842,7 @@ impl CollabPanel {
         let user_id = user.id;
         let is_current_user =
             self.user_store.read(cx).current_user().map(|user| user.id) == Some(user_id);
-        let tooltip = format!("Follow {}", user.github_login);
+        let tooltip = format!("跟随 {}", user.github_login);
 
         let is_call_admin = ActiveCall::global(cx).read(cx).room().is_some_and(|room| {
             room.read(cx).local_participant().role == proto::ChannelRole::Admin
@@ -853,17 +853,17 @@ impl CollabPanel {
             .child(Label::new(user.github_login.clone()))
             .selected(is_selected)
             .end_slot(if is_pending {
-                Label::new("Calling").color(Color::Muted).into_any_element()
+                Label::new("呼唤").color(Color::Muted).into_any_element()
             } else if is_current_user {
-                IconButton::new("leave-call", IconName::Exit)
+                IconButton::new("请假", IconName::Exit)
                     .style(ButtonStyle::Subtle)
                     .on_click(move |_, cx| Self::leave_call(cx))
-                    .tooltip(|cx| Tooltip::text("Leave Call", cx))
+                    .tooltip(|cx| Tooltip::text("请假", cx))
                     .into_any_element()
             } else if role == proto::ChannelRole::Guest {
-                Label::new("Guest").color(Color::Muted).into_any_element()
+                Label::new("访客").color(Color::Muted).into_any_element()
             } else if role == proto::ChannelRole::Talker {
-                Label::new("Mic only")
+                Label::new("仅麦克风")
                     .color(Color::Muted)
                     .into_any_element()
             } else {
@@ -897,7 +897,7 @@ impl CollabPanel {
         cx: &mut ViewContext<Self>,
     ) -> impl IntoElement {
         let project_name: SharedString = if worktree_root_names.is_empty() {
-            "untitled".to_string()
+            "未命名".to_string()
         } else {
             worktree_root_names.join(", ")
         }
@@ -910,7 +910,7 @@ impl CollabPanel {
                     .update(cx, |workspace, cx| {
                         let app_state = workspace.app_state().clone();
                         workspace::join_in_room_project(project_id, host_user_id, app_state, cx)
-                            .detach_and_prompt_err("Failed to join project", cx, |_, _| None);
+                            .detach_and_prompt_err("未加入项目", cx, |_, _| None);
                     })
                     .ok();
             }))
@@ -921,7 +921,7 @@ impl CollabPanel {
                     .child(IconButton::new(0, IconName::Folder)),
             )
             .child(Label::new(project_name.clone()))
-            .tooltip(move |cx| Tooltip::text(format!("Open {}", project_name), cx))
+            .tooltip(move |cx| Tooltip::text(format!("打开 {}", project_name), cx))
     }
 
     fn render_participant_screen(
@@ -933,7 +933,7 @@ impl CollabPanel {
     ) -> impl IntoElement {
         let id = peer_id.map_or(usize::MAX, |id| id.as_u64() as usize);
 
-        ListItem::new(("screen", id))
+        ListItem::new(("筛选", id))
             .selected(is_selected)
             .start_slot(
                 h_flex()
@@ -941,7 +941,7 @@ impl CollabPanel {
                     .child(render_tree_branch(is_last, false, cx))
                     .child(IconButton::new(0, IconName::Screen)),
             )
-            .child(Label::new("Screen"))
+            .child(Label::new("屏幕"))
             .when_some(peer_id, |this, _| {
                 this.on_click(cx.listener(move |this, _, cx| {
                     this.workspace
@@ -950,7 +950,7 @@ impl CollabPanel {
                         })
                         .ok();
                 }))
-                .tooltip(move |cx| Tooltip::text("Open shared screen", cx))
+                .tooltip(move |cx| Tooltip::text("打开共享屏幕", cx))
             })
     }
 
@@ -973,7 +973,7 @@ impl CollabPanel {
     ) -> impl IntoElement {
         let channel_store = self.channel_store.read(cx);
         let has_channel_buffer_changed = channel_store.has_channel_buffer_changed(channel_id);
-        ListItem::new("channel-notes")
+        ListItem::new("频道说明")
             .selected(is_selected)
             .on_click(cx.listener(move |this, _, cx| {
                 this.open_channel_notes(channel_id, cx);
@@ -993,8 +993,8 @@ impl CollabPanel {
                             .child(Indicator::dot().color(Color::Info))
                     })),
             )
-            .child(Label::new("notes"))
-            .tooltip(move |cx| Tooltip::text("Open Channel Notes", cx))
+            .child(Label::new("说明"))
+            .tooltip(move |cx| Tooltip::text("打开频道说明", cx))
     }
 
     fn render_channel_chat(
@@ -1005,7 +1005,7 @@ impl CollabPanel {
     ) -> impl IntoElement {
         let channel_store = self.channel_store.read(cx);
         let has_messages_notification = channel_store.has_new_messages(channel_id);
-        ListItem::new("channel-chat")
+        ListItem::new("频道聊天")
             .selected(is_selected)
             .on_click(cx.listener(move |this, _, cx| {
                 this.join_channel_chat(channel_id, cx);
@@ -1025,8 +1025,8 @@ impl CollabPanel {
                             .child(Indicator::dot().color(Color::Info))
                     })),
             )
-            .child(Label::new("chat"))
-            .tooltip(move |cx| Tooltip::text("Open Chat", cx))
+            .child(Label::new("聊天"))
+            .tooltip(move |cx| Tooltip::text("打开聊天", cx))
     }
 
     fn render_channel_project(
@@ -1037,7 +1037,7 @@ impl CollabPanel {
         cx: &mut ViewContext<Self>,
     ) -> impl IntoElement {
         ListItem::new(ElementId::NamedInteger(
-            "channel-project".into(),
+            "频道项目".into(),
             id.0 as usize,
         ))
         .indent_level(2)
@@ -1047,7 +1047,7 @@ impl CollabPanel {
             if let Some(workspace) = this.workspace.upgrade() {
                 let app_state = workspace.read(cx).app_state().clone();
                 workspace::join_hosted_project(id, app_state, cx).detach_and_prompt_err(
-                    "Failed to open project",
+                    "无法打开项目",
                     cx,
                     |_, _| None,
                 )
@@ -1060,7 +1060,7 @@ impl CollabPanel {
                 .child(IconButton::new(0, IconName::FileTree)),
         )
         .child(Label::new(name.clone()))
-        .tooltip(move |cx| Tooltip::text("Open Project", cx))
+        .tooltip(move |cx| Tooltip::text("打开项目", cx))
     }
 
     fn has_subchannels(&self, ix: usize) -> bool {
@@ -1091,7 +1091,7 @@ impl CollabPanel {
         let context_menu = ContextMenu::build(cx, |mut context_menu, cx| {
             if role == proto::ChannelRole::Guest {
                 context_menu = context_menu.entry(
-                    "Grant Mic Access",
+                    "授予麦克风访问权限",
                     None,
                     cx.handler_for(&this, move |_, cx| {
                         ActiveCall::global(cx)
@@ -1107,13 +1107,13 @@ impl CollabPanel {
                                     )
                                 })
                             })
-                            .detach_and_prompt_err("Failed to grant mic access", cx, |_, _| None)
+                            .detach_and_prompt_err("无法授予麦克风访问权限", cx, |_, _| None)
                     }),
                 );
             }
             if role == proto::ChannelRole::Guest || role == proto::ChannelRole::Talker {
                 context_menu = context_menu.entry(
-                    "Grant Write Access",
+                    "授予写入权限",
                     None,
                     cx.handler_for(&this, move |_, cx| {
                         ActiveCall::global(cx)
@@ -1129,9 +1129,9 @@ impl CollabPanel {
                                     )
                                 })
                             })
-                            .detach_and_prompt_err("Failed to grant write access", cx, |e, _| {
+                            .detach_and_prompt_err("无法授予写入访问权限", cx, |e, _| {
                                 match e.error_code() {
-                                    ErrorCode::NeedsCla => Some("This user has not yet signed the CLA at https://zed.dev/cla.".into()),
+                                    ErrorCode::NeedsCla => Some("此用户尚未在 https://zed.dev/cla 上签署 CLA".into()),
                                     _ => None,
                                 }
                             })
@@ -1140,9 +1140,9 @@ impl CollabPanel {
             }
             if role == proto::ChannelRole::Member || role == proto::ChannelRole::Talker {
                 let label = if role == proto::ChannelRole::Talker {
-                    "Mute"
+                    "静音"
                 } else {
-                    "Revoke Access"
+                    "撤销访问权限"
                 };
                 context_menu = context_menu.entry(
                     label,
@@ -1161,7 +1161,7 @@ impl CollabPanel {
                                     )
                                 })
                             })
-                            .detach_and_prompt_err("Failed to revoke access", cx, |_, _| None)
+                            .detach_and_prompt_err("无法撤消访问权限", cx, |_, _| None)
                     }),
                 );
             }
@@ -1201,9 +1201,9 @@ impl CollabPanel {
         let context_menu = ContextMenu::build(cx, |mut context_menu, cx| {
             if self.has_subchannels(ix) {
                 let expand_action_name = if self.is_channel_collapsed(channel_id) {
-                    "Expand Subchannels"
+                    "展开子频道"
                 } else {
-                    "Collapse Subchannels"
+                    "折叠子频道"
                 };
                 context_menu = context_menu.entry(
                     expand_action_name,
@@ -1216,21 +1216,21 @@ impl CollabPanel {
 
             context_menu = context_menu
                 .entry(
-                    "Open Notes",
+                    "打开说明",
                     None,
                     cx.handler_for(&this, move |this, cx| {
                         this.open_channel_notes(channel_id, cx)
                     }),
                 )
                 .entry(
-                    "Open Chat",
+                    "打开聊天",
                     None,
                     cx.handler_for(&this, move |this, cx| {
                         this.join_channel_chat(channel_id, cx)
                     }),
                 )
                 .entry(
-                    "Copy Channel Link",
+                    "复制频道链接",
                     None,
                     cx.handler_for(&this, move |this, cx| {
                         this.copy_channel_link(channel_id, cx)
@@ -1243,19 +1243,19 @@ impl CollabPanel {
                 context_menu = context_menu
                     .separator()
                     .entry(
-                        "New Subchannel",
+                        "新建子频道",
                         None,
                         cx.handler_for(&this, move |this, cx| this.new_subchannel(channel_id, cx)),
                     )
                     .entry(
-                        "Rename",
+                        "重命名",
                         Some(Box::new(SecondaryConfirm)),
                         cx.handler_for(&this, move |this, cx| this.rename_channel(channel_id, cx)),
                     );
 
                 if let Some(channel_name) = clipboard_channel_name {
                     context_menu = context_menu.separator().entry(
-                        format!("Move '#{}' here", channel_name),
+                        format!("移动 '#{}' 到这", channel_name),
                         None,
                         cx.handler_for(&this, move |this, cx| {
                             this.move_channel_on_clipboard(channel_id, cx)
@@ -1265,13 +1265,13 @@ impl CollabPanel {
 
                 if self.channel_store.read(cx).is_root_channel(channel_id) {
                     context_menu = context_menu.separator().entry(
-                        "Manage Members",
+                        "管理成员",
                         None,
                         cx.handler_for(&this, move |this, cx| this.manage_members(channel_id, cx)),
                     )
                 } else {
                     context_menu = context_menu.entry(
-                        "Move this channel",
+                        "移动此频道",
                         None,
                         cx.handler_for(&this, move |this, cx| {
                             this.start_move_channel(channel_id, cx)
@@ -1279,7 +1279,7 @@ impl CollabPanel {
                     );
                     if self.channel_store.read(cx).is_public_channel(channel_id) {
                         context_menu = context_menu.separator().entry(
-                            "Make Channel Private",
+                            "将频道设为私密",
                             None,
                             cx.handler_for(&this, move |this, cx| {
                                 this.set_channel_visibility(
@@ -1291,7 +1291,7 @@ impl CollabPanel {
                         )
                     } else {
                         context_menu = context_menu.separator().entry(
-                            "Make Channel Public",
+                            "将频道设为公开",
                             None,
                             cx.handler_for(&this, move |this, cx| {
                                 this.set_channel_visibility(
@@ -1305,7 +1305,7 @@ impl CollabPanel {
                 }
 
                 context_menu = context_menu.entry(
-                    "Delete",
+                    "删除",
                     None,
                     cx.handler_for(&this, move |this, cx| this.remove_channel(channel_id, cx)),
                 );
@@ -1316,7 +1316,7 @@ impl CollabPanel {
                     context_menu = context_menu.separator()
                 }
                 context_menu = context_menu.entry(
-                    "Leave Channel",
+                    "离开频道",
                     None,
                     cx.handler_for(&this, move |this, cx| this.leave_channel(channel_id, cx)),
                 );
@@ -1355,9 +1355,9 @@ impl CollabPanel {
 
             if contact.online && !contact.busy {
                 let label = if in_room {
-                    format!("Invite {} to join", contact.user.github_login)
+                    format!("邀请 {} 加入", contact.user.github_login)
                 } else {
-                    format!("Call {}", contact.user.github_login)
+                    format!("呼叫 {}", contact.user.github_login)
                 };
                 context_menu = context_menu.entry(label, None, {
                     let this = this.clone();
@@ -1369,7 +1369,7 @@ impl CollabPanel {
                 });
             }
 
-            context_menu.entry("Remove Contact", None, {
+            context_menu.entry("删除联系人", None, {
                 let this = this.clone();
                 move |cx| {
                     this.update(cx, |this, cx| {
@@ -1476,7 +1476,7 @@ impl CollabPanel {
                                 cx,
                             )
                             .detach_and_prompt_err(
-                                "Failed to join project",
+                                "无法加入项目",
                                 cx,
                                 |_, _| None,
                             );
@@ -1582,12 +1582,12 @@ impl CollabPanel {
                             })
                         })
                         .detach_and_prompt_err(
-                            "Failed to create channel",
+                            "无法创建频道",
                             cx,
                             |_, _| None,
                         );
                     } else {
-                        create.detach_and_prompt_err("Failed to create channel", cx, |_, _| None);
+                        create.detach_and_prompt_err("无法创建频道", cx, |_, _| None);
                     }
                     cx.notify();
                 }
@@ -1675,7 +1675,7 @@ impl CollabPanel {
     fn leave_call(cx: &mut WindowContext) {
         ActiveCall::global(cx)
             .update(cx, |call, cx| call.hang_up(cx))
-            .detach_and_prompt_err("Failed to hang up", cx, |_, _| None);
+            .detach_and_prompt_err("挂断电话失败", cx, |_, _| None);
     }
 
     fn toggle_contact_finder(&mut self, cx: &mut ViewContext<Self>) {
@@ -1767,12 +1767,12 @@ impl CollabPanel {
             .update(cx, |channel_store, cx| {
                 channel_store.set_channel_visibility(channel_id, visibility, cx)
             })
-            .detach_and_prompt_err("Failed to set channel visibility", cx, |e, _| match e.error_code() {
+            .detach_and_prompt_err("无法设置频道可见性", cx, |e, _| match e.error_code() {
                 ErrorCode::BadPublicNesting =>
-                    if e.error_tag("direction") == Some("parent") {
-                        Some("To make a channel public, its parent channel must be public.".to_string())
+                    if e.error_tag("指向") == Some("父") {
+                        Some("要使频道公开，其父频道必须是公开的".to_string())
                     } else {
-                        Some("To make a channel private, all of its subchannels must be private.".to_string())
+                        Some("要将频道设为私有，其所有子频道都必须是私有的".to_string())
                     },
                 _ => None
             });
@@ -1803,13 +1803,13 @@ impl CollabPanel {
             .update(cx, |channel_store, cx| {
                 channel_store.move_channel(channel_id, to, cx)
             })
-            .detach_and_prompt_err("Failed to move channel", cx, |e, _| match e.error_code() {
+            .detach_and_prompt_err("无法移动频道", cx, |e, _| match e.error_code() {
                 ErrorCode::BadPublicNesting => {
-                    Some("Public channels must have public parents".into())
+                    Some("公共频道必须有公共父频道".into())
                 }
-                ErrorCode::CircularNesting => Some("You cannot move a channel into itself".into()),
+                ErrorCode::CircularNesting => Some("您无法将频道移动到自身中".into()),
                 ErrorCode::WrongMoveTarget => {
-                    Some("You cannot move a channel into a different root channel".into())
+                    Some("不能将通道移动到其他根频道中".into())
                 }
                 _ => None,
             })
@@ -1898,12 +1898,12 @@ impl CollabPanel {
         let Some(channel) = self.channel_store.read(cx).channel_for_id(channel_id) else {
             return;
         };
-        let prompt_message = format!("Are you sure you want to leave \"#{}\"?", channel.name);
+        let prompt_message = format!("你确定要离开 \"#{}\"?", channel.name);
         let answer = cx.prompt(
             PromptLevel::Warning,
             &prompt_message,
             None,
-            &["Leave", "Cancel"],
+            &["离开", "取消"],
         );
         cx.spawn(|this, mut cx| async move {
             if answer.await? != 0 {
@@ -1916,21 +1916,21 @@ impl CollabPanel {
             })?
             .await
         })
-        .detach_and_prompt_err("Failed to leave channel", cx, |_, _| None)
+        .detach_and_prompt_err("无法离开频道", cx, |_, _| None)
     }
 
     fn remove_channel(&mut self, channel_id: ChannelId, cx: &mut ViewContext<Self>) {
         let channel_store = self.channel_store.clone();
         if let Some(channel) = channel_store.read(cx).channel_for_id(channel_id) {
             let prompt_message = format!(
-                "Are you sure you want to remove the channel \"{}\"?",
+                "您确定要删除频道 \"{}\"?",
                 channel.name
             );
             let answer = cx.prompt(
                 PromptLevel::Warning,
                 &prompt_message,
                 None,
-                &["Remove", "Cancel"],
+                &["删除", "取消"],
             );
             cx.spawn(|this, mut cx| async move {
                 if answer.await? == 0 {
@@ -1949,14 +1949,14 @@ impl CollabPanel {
     fn remove_contact(&mut self, user_id: u64, github_login: &str, cx: &mut ViewContext<Self>) {
         let user_store = self.user_store.clone();
         let prompt_message = format!(
-            "Are you sure you want to remove \"{}\" from your contacts?",
+            "是否确实要删除 \"{}\" 联系人?",
             github_login
         );
         let answer = cx.prompt(
             PromptLevel::Warning,
             &prompt_message,
             None,
-            &["Remove", "Cancel"],
+            &["删除", "取消"],
         );
         cx.spawn(|_, mut cx| async move {
             if answer.await? == 0 {
@@ -1967,7 +1967,7 @@ impl CollabPanel {
             }
             anyhow::Ok(())
         })
-        .detach_and_prompt_err("Failed to remove contact", cx, |_, _| None);
+        .detach_and_prompt_err("无法删除联系人", cx, |_, _| None);
     }
 
     fn respond_to_contact_request(
@@ -1980,7 +1980,7 @@ impl CollabPanel {
             .update(cx, |store, cx| {
                 store.respond_to_contact_request(user_id, accept, cx)
             })
-            .detach_and_prompt_err("Failed to respond to contact request", cx, |_, _| None);
+            .detach_and_prompt_err("无法响应联系请求", cx, |_, _| None);
     }
 
     fn respond_to_channel_invite(
@@ -2001,7 +2001,7 @@ impl CollabPanel {
             .update(cx, |call, cx| {
                 call.invite(recipient_user_id, Some(self.project.clone()), cx)
             })
-            .detach_and_prompt_err("Call failed", cx, |_, _| None);
+            .detach_and_prompt_err("呼叫失败", cx, |_, _| None);
     }
 
     fn join_channel(&self, channel_id: ChannelId, cx: &mut ViewContext<Self>) {
@@ -2017,7 +2017,7 @@ impl CollabPanel {
             Some(handle),
             cx,
         )
-        .detach_and_prompt_err("Failed to join channel", cx, |_, _| None)
+        .detach_and_prompt_err("无法加入频道", cx, |_, _| None)
     }
 
     fn join_channel_chat(&mut self, channel_id: ChannelId, cx: &mut ViewContext<Self>) {
@@ -2047,7 +2047,7 @@ impl CollabPanel {
     }
 
     fn render_signed_out(&mut self, cx: &mut ViewContext<Self>) -> Div {
-        let collab_blurb = "Work with your team in realtime with collaborative editing, voice, shared notes and more.";
+        let collab_blurb = "通过协作编辑、语音、共享笔记等功能与您的团队实时协作";
 
         v_flex()
             .gap_6()
@@ -2057,7 +2057,7 @@ impl CollabPanel {
                 v_flex()
                     .gap_2()
                     .child(
-                        Button::new("sign_in", "Sign in")
+                        Button::new("登录", "登录")
                             .icon_color(Color::Muted)
                             .icon(IconName::Github)
                             .icon_position(IconPosition::Start)
@@ -2076,7 +2076,7 @@ impl CollabPanel {
                     )
                     .child(
                         div().flex().w_full().items_center().child(
-                            Label::new("Sign in to enable collaboration.")
+                            Label::new("登录以启用协作")
                                 .color(Color::Muted)
                                 .size(LabelSize::Small),
                         ),
@@ -2228,10 +2228,10 @@ impl CollabPanel {
                     channel_link = Some(channel.link(cx));
                     (channel_icon, channel_tooltip_text) = match channel.visibility {
                         proto::ChannelVisibility::Public => {
-                            (Some("icons/public.svg"), Some("Copy public channel link."))
+                            (Some("icons/public.svg"), Some("复制公共频道链接"))
                         }
                         proto::ChannelVisibility::Members => {
-                            (Some("icons/hash.svg"), Some("Copy private channel link."))
+                            (Some("icons/hash.svg"), Some("复制专用频道链接"))
                         }
                     };
 
@@ -2241,41 +2241,41 @@ impl CollabPanel {
                 if let Some(name) = channel_name {
                     SharedString::from(name.to_string())
                 } else {
-                    SharedString::from("Current Call")
+                    SharedString::from("当前呼叫")
                 }
             }
-            Section::ContactRequests => SharedString::from("Requests"),
-            Section::Contacts => SharedString::from("Contacts"),
-            Section::Channels => SharedString::from("Channels"),
-            Section::ChannelInvites => SharedString::from("Invites"),
-            Section::Online => SharedString::from("Online"),
-            Section::Offline => SharedString::from("Offline"),
+            Section::ContactRequests => SharedString::from("请求"),
+            Section::Contacts => SharedString::from("联系人"),
+            Section::Channels => SharedString::from("频道"),
+            Section::ChannelInvites => SharedString::from("邀请"),
+            Section::Online => SharedString::from("在线"),
+            Section::Offline => SharedString::from("离线"),
         };
 
         let button = match section {
             Section::ActiveCall => channel_link.map(|channel_link| {
                 let channel_link_copy = channel_link.clone();
-                IconButton::new("channel-link", IconName::Copy)
+                IconButton::new("频道链接", IconName::Copy)
                     .icon_size(IconSize::Small)
                     .size(ButtonSize::None)
-                    .visible_on_hover("section-header")
+                    .visible_on_hover("标题")
                     .on_click(move |_, cx| {
                         let item = ClipboardItem::new(channel_link_copy.clone());
                         cx.write_to_clipboard(item)
                     })
-                    .tooltip(|cx| Tooltip::text("Copy channel link", cx))
+                    .tooltip(|cx| Tooltip::text("复制频道链接", cx))
                     .into_any_element()
             }),
             Section::Contacts => Some(
-                IconButton::new("add-contact", IconName::Plus)
+                IconButton::new("添加联系人", IconName::Plus)
                     .on_click(cx.listener(|this, _, cx| this.toggle_contact_finder(cx)))
-                    .tooltip(|cx| Tooltip::text("Search for new contact", cx))
+                    .tooltip(|cx| Tooltip::text("搜索新联系人", cx))
                     .into_any_element(),
             ),
             Section::Channels => Some(
-                IconButton::new("add-channel", IconName::Plus)
+                IconButton::new("添加新频道", IconName::Plus)
                     .on_click(cx.listener(|this, _, cx| this.new_root_channel(cx)))
-                    .tooltip(|cx| Tooltip::text("Create a channel", cx))
+                    .tooltip(|cx| Tooltip::text("创建频道", cx))
                     .into_any_element(),
             ),
             _ => None,
@@ -2289,7 +2289,7 @@ impl CollabPanel {
             | Section::Offline => true,
         };
 
-        h_flex().w_full().group("section-header").child(
+        h_flex().w_full().group("标题").child(
             ListHeader::new(text)
                 .when(can_collapse, |header| {
                     header
@@ -2324,11 +2324,11 @@ impl CollabPanel {
                     .justify_between()
                     .child(Label::new(github_login.clone()))
                     .when(calling, |el| {
-                        el.child(Label::new("Calling").color(Color::Muted))
+                        el.child(Label::new("呼叫").color(Color::Muted))
                     })
                     .when(!calling, |el| {
                         el.child(
-                            IconButton::new("contact context menu", IconName::Ellipsis)
+                            IconButton::new("联系人菜单", IconName::Ellipsis)
                                 .icon_color(Color::Muted)
                                 .visible_on_hover("")
                                 .on_click(cx.listener({
@@ -2369,15 +2369,15 @@ impl CollabPanel {
             .child(item)
             .tooltip(move |cx| {
                 let text = if !online {
-                    format!(" {} is offline", &github_login)
+                    format!(" {} 离线", &github_login)
                 } else if busy {
-                    format!(" {} is on a call", &github_login)
+                    format!(" {} 正在通话", &github_login)
                 } else {
                     let room = ActiveCall::global(cx).read(cx).room();
                     if room.is_some() {
-                        format!("Invite {} to join call", &github_login)
+                        format!("邀请 {} 加入通话", &github_login)
                     } else {
-                        format!("Call {}", &github_login)
+                        format!("呼叫 {}", &github_login)
                     }
                 };
                 Tooltip::text(text, cx)
@@ -2402,27 +2402,27 @@ impl CollabPanel {
 
         let controls = if is_incoming {
             vec![
-                IconButton::new("decline-contact", IconName::Close)
+                IconButton::new("拒绝联系", IconName::Close)
                     .on_click(cx.listener(move |this, _, cx| {
                         this.respond_to_contact_request(user_id, false, cx);
                     }))
                     .icon_color(color)
-                    .tooltip(|cx| Tooltip::text("Decline invite", cx)),
-                IconButton::new("accept-contact", IconName::Check)
+                    .tooltip(|cx| Tooltip::text("拒绝邀请", cx)),
+                IconButton::new("接受联系", IconName::Check)
                     .on_click(cx.listener(move |this, _, cx| {
                         this.respond_to_contact_request(user_id, true, cx);
                     }))
                     .icon_color(color)
-                    .tooltip(|cx| Tooltip::text("Accept invite", cx)),
+                    .tooltip(|cx| Tooltip::text("接受邀请", cx)),
             ]
         } else {
             let github_login = github_login.clone();
-            vec![IconButton::new("remove_contact", IconName::Close)
+            vec![IconButton::new("删除联系人", IconName::Close)
                 .on_click(cx.listener(move |this, _, cx| {
                     this.remove_contact(user_id, &github_login, cx);
                 }))
                 .icon_color(color)
-                .tooltip(|cx| Tooltip::text("Cancel invite", cx))]
+                .tooltip(|cx| Tooltip::text("取消邀请", cx))]
         };
 
         ListItem::new(github_login.clone())
@@ -2457,21 +2457,21 @@ impl CollabPanel {
         };
 
         let controls = [
-            IconButton::new("reject-invite", IconName::Close)
+            IconButton::new("拒绝邀请", IconName::Close)
                 .on_click(cx.listener(move |this, _, cx| {
                     this.respond_to_channel_invite(channel_id, false, cx);
                 }))
                 .icon_color(color)
-                .tooltip(|cx| Tooltip::text("Decline invite", cx)),
-            IconButton::new("accept-invite", IconName::Check)
+                .tooltip(|cx| Tooltip::text("拒绝邀请", cx)),
+            IconButton::new("接受邀请", IconName::Check)
                 .on_click(cx.listener(move |this, _, cx| {
                     this.respond_to_channel_invite(channel_id, true, cx);
                 }))
                 .icon_color(color)
-                .tooltip(|cx| Tooltip::text("Accept invite", cx)),
+                .tooltip(|cx| Tooltip::text("接受邀请", cx)),
         ];
 
-        ListItem::new(("channel-invite", channel.id.0 as usize))
+        ListItem::new(("频道邀请", channel.id.0 as usize))
             .selected(is_selected)
             .child(
                 h_flex()
@@ -2492,9 +2492,9 @@ impl CollabPanel {
         is_selected: bool,
         cx: &mut ViewContext<Self>,
     ) -> ListItem {
-        ListItem::new("contact-placeholder")
+        ListItem::new("联系人")
             .child(Icon::new(IconName::Plus))
-            .child(Label::new("Add a Contact"))
+            .child(Label::new("添加联系人"))
             .selected(is_selected)
             .on_click(cx.listener(|this, _, cx| this.toggle_contact_finder(cx)))
     }
@@ -2648,7 +2648,7 @@ impl CollabPanel {
                         .gap_1()
                         .px_1()
                         .child(
-                            IconButton::new("channel_chat", IconName::MessageBubbles)
+                            IconButton::new("频道聊天", IconName::MessageBubbles)
                                 .style(ButtonStyle::Filled)
                                 .shape(ui::IconButtonShape::Square)
                                 .icon_size(IconSize::Small)
@@ -2660,11 +2660,11 @@ impl CollabPanel {
                                 .on_click(cx.listener(move |this, _, cx| {
                                     this.join_channel_chat(channel_id, cx)
                                 }))
-                                .tooltip(|cx| Tooltip::text("Open channel chat", cx))
+                                .tooltip(|cx| Tooltip::text("打开频道聊天", cx))
                                 .visible_on_hover(""),
                         )
                         .child(
-                            IconButton::new("channel_notes", IconName::File)
+                            IconButton::new("频道说明", IconName::File)
                                 .style(ButtonStyle::Filled)
                                 .shape(ui::IconButtonShape::Square)
                                 .icon_size(IconSize::Small)
@@ -2676,7 +2676,7 @@ impl CollabPanel {
                                 .on_click(cx.listener(move |this, _, cx| {
                                     this.open_channel_notes(channel_id, cx)
                                 }))
-                                .tooltip(|cx| Tooltip::text("Open channel notes", cx))
+                                .tooltip(|cx| Tooltip::text("开放频道说明", cx))
                                 .visible_on_hover(""),
                         ),
                 ),
@@ -2695,7 +2695,7 @@ impl CollabPanel {
     }
 
     fn render_channel_editor(&self, depth: usize, _cx: &mut ViewContext<Self>) -> impl IntoElement {
-        let item = ListItem::new("channel-editor")
+        let item = ListItem::new("频道编辑")
             .inset(false)
             // Add one level of depth for the disclosure arrow.
             .indent_level(depth + 1)
@@ -2760,7 +2760,7 @@ fn render_tree_branch(is_last: bool, overdraw: bool, cx: &mut WindowContext) -> 
 impl Render for CollabPanel {
     fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
         v_flex()
-            .key_context("CollabPanel")
+            .key_context("协作面板")
             .on_action(cx.listener(CollabPanel::cancel))
             .on_action(cx.listener(CollabPanel::select_next))
             .on_action(cx.listener(CollabPanel::select_prev))
@@ -2828,7 +2828,7 @@ impl Panel for CollabPanel {
     }
 
     fn icon_tooltip(&self, _cx: &WindowContext) -> Option<&'static str> {
-        Some("Collab Panel")
+        Some("协作面板")
     }
 
     fn toggle_action(&self) -> Box<dyn gpui::Action> {
@@ -2836,7 +2836,7 @@ impl Panel for CollabPanel {
     }
 
     fn persistent_name() -> &'static str {
-        "CollabPanel"
+        "协作面板"
     }
 }
 
@@ -2997,7 +2997,7 @@ impl Render for JoinChannelTooltip {
                 .channel_participants(self.channel_id);
 
             container
-                .child(Label::new("Join channel"))
+                .child(Label::new("加入频道"))
                 .children(participants.iter().map(|participant| {
                     h_flex()
                         .gap_2()
