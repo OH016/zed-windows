@@ -274,7 +274,7 @@ impl OutlinePanel {
             .background_executor()
             .spawn(async move { KEY_VALUE_STORE.read_kvp(OUTLINE_PANEL_KEY) })
             .await
-            .context("loading outline panel")
+            .context("加载大纲面板")
             .log_err()
             .flatten()
             .map(|panel| serde_json::from_str::<SerializedOutlinePanel>(&panel))
@@ -300,7 +300,7 @@ impl OutlinePanel {
         let outline_panel = cx.new_view(|cx| {
             let filter_editor = cx.new_view(|cx| {
                 let mut editor = Editor::single_line(cx);
-                editor.set_placeholder_text("Filter...", cx);
+                editor.set_placeholder_text("筛选...", cx);
                 editor
             });
             let filter_update_subscription =
@@ -316,7 +316,7 @@ impl OutlinePanel {
                 &workspace
                     .weak_handle()
                     .upgrade()
-                    .expect("have a &mut Workspace"),
+                    .expect("有一个 & mut 工作区"),
                 move |outline_panel, workspace, event, cx| {
                     if let workspace::Event::ActiveItemChanged = event {
                         if let Some(new_active_editor) = workspace
@@ -799,21 +799,21 @@ impl OutlinePanel {
         let context_menu = ContextMenu::build(cx, |menu, _| {
             menu.context(self.focus_handle.clone())
                 .when(cfg!(target_os = "macos"), |menu| {
-                    menu.action("Reveal in Finder", Box::new(RevealInFileManager))
+                    menu.action("在Finder中显示", Box::new(RevealInFileManager))
                 })
                 .when(cfg!(not(target_os = "macos")), |menu| {
-                    menu.action("Reveal in File Manager", Box::new(RevealInFileManager))
+                    menu.action("在文件管理器中显示", Box::new(RevealInFileManager))
                 })
-                .action("Open in Terminal", Box::new(OpenInTerminal))
+                .action("在终端中打开", Box::new(OpenInTerminal))
                 .when(is_unfoldable, |menu| {
-                    menu.action("Unfold Directory", Box::new(UnfoldDirectory))
+                    menu.action("展开目录", Box::new(UnfoldDirectory))
                 })
                 .when(is_foldable, |menu| {
-                    menu.action("Fold Directory", Box::new(FoldDirectory))
+                    menu.action("折叠目录", Box::new(FoldDirectory))
                 })
                 .separator()
-                .action("Copy Path", Box::new(CopyPath))
-                .action("Copy Relative Path", Box::new(CopyRelativePath))
+                .action("复制路径", Box::new(CopyPath))
+                .action("复制相对路径", Box::new(CopyRelativePath))
         });
         cx.focus_view(&context_menu);
         let subscription = cx.subscribe(&context_menu, |outline_panel, _, _: &DismissEvent, cx| {
@@ -1396,9 +1396,9 @@ impl OutlinePanel {
                             .map(|icon| icon.color(color).into_any_element());
                             (icon, file_name(path.as_ref()))
                         }
-                        None => (None, "Untitled".to_string()),
+                        None => (None, "无标题".to_string()),
                     },
-                    None => (None, "Unknown buffer".to_string()),
+                    None => (None, "未知缓冲区".to_string()),
                 };
                 (
                     ElementId::from(buffer_id.to_proto() as usize),
@@ -2767,7 +2767,7 @@ fn file_name(path: &Path) -> String {
 
 impl Panel for OutlinePanel {
     fn persistent_name() -> &'static str {
-        "Outline Panel"
+        "大纲面板"
     }
 
     fn position(&self, cx: &WindowContext) -> DockPosition {
@@ -2813,7 +2813,7 @@ impl Panel for OutlinePanel {
     }
 
     fn icon_tooltip(&self, _: &WindowContext) -> Option<&'static str> {
-        Some("Outline Panel")
+        Some("大纲面板")
     }
 
     fn toggle_action(&self) -> Box<dyn Action> {
@@ -2909,11 +2909,11 @@ impl Render for OutlinePanel {
 
         if self.cached_entries_with_depth.is_empty() {
             let header = if self.updating_fs_entries {
-                "Loading outlines"
+                "正在加载提纲"
             } else if query.is_some() {
-                "No matches for query"
+                "没有符合查询条件的项"
             } else {
-                "No outlines available"
+                "没有可用的提纲"
             };
 
             outline_panel.child(
@@ -2940,14 +2940,14 @@ impl Render for OutlinePanel {
                                         cx.keystroke_text_for(&workspace::ToggleRightDock)
                                     }
                                 };
-                                Label::new(format!("Toggle this panel with {keystroke}"))
+                                Label::new(format!("切换此面板 {keystroke}"))
                             }),
                     ),
             )
         } else {
             outline_panel.child({
                 let items_len = self.cached_entries_with_depth.len();
-                uniform_list(cx.view().clone(), "entries", items_len, {
+                uniform_list(cx.view().clone(), "条目", items_len, {
                     move |outline_panel, range, cx| {
                         let entries = outline_panel.cached_entries_with_depth.get(range);
                         entries
