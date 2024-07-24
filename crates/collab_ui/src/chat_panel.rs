@@ -319,7 +319,7 @@ impl ChatPanel {
                         .child(Icon::new(IconName::ReplyArrowRight).color(Color::Muted))
                         .when(reply_to_message.is_none(), |el| {
                             el.child(
-                                Label::new("Message has been deleted...")
+                                Label::new("消息已删除...")
                                     .size(LabelSize::XSmall)
                                     .color(Color::Muted),
                             )
@@ -369,7 +369,7 @@ impl ChatPanel {
                     ),
                 )
                 .cursor(CursorStyle::PointingHand)
-                .tooltip(|cx| Tooltip::text("Go to message", cx))
+                .tooltip(|cx| Tooltip::text("转至消息", cx))
                 .on_click(cx.listener(move |chat_panel, _, cx| {
                     if let Some(channel_id) = current_channel_id {
                         chat_panel
@@ -553,7 +553,7 @@ impl ChatPanel {
                                     .rounded_md()
                                     .text_ui_xs(cx)
                                     .bg(cx.theme().colors().background)
-                                    .child("New messages"),
+                                    .child("新消息"),
                             )
                             .child(div().w_full().h_0p5().bg(cx.theme().colors().border)),
                     )
@@ -615,7 +615,7 @@ impl ChatPanel {
                                         })
                                     })),
                             )
-                            .tooltip(|cx| Tooltip::text("Reply", cx)),
+                            .tooltip(|cx| Tooltip::text("回复", cx)),
                     ),
                 )
             })
@@ -648,7 +648,7 @@ impl ChatPanel {
                                                         .buffer()
                                                         .read(cx)
                                                         .as_singleton()
-                                                        .expect("message editor must be singleton");
+                                                        .expect("消息编辑器必须是单例");
 
                                                     buffer.update(cx, |buffer, cx| {
                                                         buffer.set_text(message.body.clone(), cx)
@@ -660,7 +660,7 @@ impl ChatPanel {
                                             })
                                         })),
                                 )
-                                .tooltip(|cx| Tooltip::text("Edit", cx)),
+                                .tooltip(|cx| Tooltip::text("编辑", cx)),
                         ),
                     )
                 })
@@ -688,7 +688,7 @@ impl ChatPanel {
                                     }),
                             )
                             .id("more")
-                            .tooltip(|cx| Tooltip::text("More", cx)),
+                            .tooltip(|cx| Tooltip::text("更多", cx)),
                     ),
                 )
             })
@@ -703,7 +703,7 @@ impl ChatPanel {
         let menu = {
             ContextMenu::build(cx, move |menu, cx| {
                 menu.entry(
-                    "Copy message text",
+                    "复制消息文本",
                     None,
                     cx.handler_for(&this, move |this, cx| {
                         if let Some(message) = this.active_chat().and_then(|active_chat| {
@@ -716,7 +716,7 @@ impl ChatPanel {
                 )
                 .when(can_delete_message, |menu| {
                     menu.entry(
-                        "Delete message",
+                        "删除消息",
                         None,
                         cx.handler_for(&this, move |this, cx| this.remove_message(message_id, cx)),
                     )
@@ -913,7 +913,7 @@ impl ChatPanel {
                 .buffer()
                 .read(cx)
                 .as_singleton()
-                .expect("message editor must be singleton");
+                .expect("消息编辑器必须是单例");
 
             buffer.update(cx, |buffer, cx| buffer.set_text("", cx));
         });
@@ -963,13 +963,13 @@ impl Render for ChatPanel {
                             .size_full()
                             .p_4()
                             .child(
-                                Label::new("Select a channel to chat in.")
+                                Label::new("选择聊天频道")
                                     .size(LabelSize::Small)
                                     .color(Color::Muted),
                             )
                             .child(
                                 div().pt_1().w_full().items_center().child(
-                                    Button::new("toggle-collab", "Open")
+                                    Button::new("toggle-collab", "打开")
                                         .full_width()
                                         .key_binding(KeyBinding::for_action(
                                             &collab_panel::ToggleFocus,
@@ -1001,7 +1001,7 @@ impl Render for ChatPanel {
                         .child(
                             IconButton::new("cancel-edit-message", IconName::Close)
                                 .shape(ui::IconButtonShape::Square)
-                                .tooltip(|cx| Tooltip::text("Cancel edit message", cx))
+                                .tooltip(|cx| Tooltip::text("取消编辑消息", cx))
                                 .on_click(cx.listener(move |this, _, cx| {
                                     this.cancel_edit_message(cx);
                                 })),
@@ -1036,7 +1036,7 @@ impl Render for ChatPanel {
                                 div().flex_shrink().overflow_hidden().child(
                                     h_flex()
                                         .id(("reply-preview", reply_to_message_id))
-                                        .child(Label::new("Replying to ").size(LabelSize::Small))
+                                        .child(Label::new("回复到 ").size(LabelSize::Small))
                                         .child(
                                             Label::new(format!(
                                                 "@{}",
@@ -1063,7 +1063,7 @@ impl Render for ChatPanel {
                             .child(
                                 IconButton::new("close-reply-preview", IconName::Close)
                                     .shape(ui::IconButtonShape::Square)
-                                    .tooltip(|cx| Tooltip::text("Close reply", cx))
+                                    .tooltip(|cx| Tooltip::text("关闭回复", cx))
                                     .on_click(cx.listener(move |this, _, cx| {
                                         this.close_reply_preview(cx);
                                     })),
@@ -1141,7 +1141,7 @@ impl Panel for ChatPanel {
     }
 
     fn icon_tooltip(&self, _cx: &WindowContext) -> Option<&'static str> {
-        Some("Chat Panel")
+        Some("聊天面板")
     }
 
     fn toggle_action(&self) -> Box<dyn gpui::Action> {
@@ -1227,7 +1227,7 @@ mod tests {
         let language_registry = Arc::new(LanguageRegistry::test(cx.background_executor().clone()));
         let message = channel::ChannelMessage {
             id: ChannelMessageId::Saved(0),
-            body: "Here is a link https://zed.dev to zeds website".to_string(),
+            body: "这是 zeds 网站的链接 https://zed.dev".to_string(),
             timestamp: OffsetDateTime::now_utc(),
             sender: Arc::new(client::User {
                 github_login: "fgh".into(),
@@ -1250,7 +1250,7 @@ mod tests {
 
         // Note that the "'" was replaced with ’ due to smart punctuation.
         let (body, ranges) =
-            marked_text_ranges("Here is a link «https://zed.dev» to zeds website", false);
+            marked_text_ranges("这是 zeds 网站的链接 «https://zed.dev»", false);
         assert_eq!(message.text, body);
         assert_eq!(1, ranges.len());
         assert_eq!(
@@ -1274,7 +1274,7 @@ mod tests {
         let language_registry = Arc::new(LanguageRegistry::test(cx.background_executor().clone()));
         let message = channel::ChannelMessage {
             id: ChannelMessageId::Saved(0),
-            body: "**Here is a link https://zed.dev to zeds website**".to_string(),
+            body: "**这是 zeds 网站的链接 https://zed.dev**".to_string(),
             timestamp: OffsetDateTime::now_utc(),
             sender: Arc::new(client::User {
                 github_login: "fgh".into(),
@@ -1297,7 +1297,7 @@ mod tests {
 
         // Note that the "'" was replaced with ’ due to smart punctuation.
         let (body, ranges) = marked_text_ranges(
-            "«Here is a link »«https://zed.dev»« to zeds website»",
+            "«这是 zeds 网站的链接 »«https://zed.dev»",
             false,
         );
         assert_eq!(message.text, body);

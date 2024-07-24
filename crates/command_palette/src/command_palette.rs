@@ -232,7 +232,7 @@ impl PickerDelegate for CommandPaletteDelegate {
     type ListItem = ListItem;
 
     fn placeholder_text(&self, _cx: &mut WindowContext) -> Arc<str> {
-        "Execute a command...".into()
+        "执行命令...".into()
     }
 
     fn match_count(&self) -> usize {
@@ -363,7 +363,7 @@ impl PickerDelegate for CommandPaletteDelegate {
         let command = self.commands.swap_remove(action_ix);
 
         self.telemetry
-            .report_action_event("command palette", command.name.clone());
+            .report_action_event("命令面板", command.name.clone());
 
         self.matches.clear();
         self.commands.clear();
