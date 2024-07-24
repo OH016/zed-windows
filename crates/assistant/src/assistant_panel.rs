@@ -166,7 +166,7 @@ impl PickerDelegate for SavedContextPickerDelegate {
     }
 
     fn placeholder_text(&self, _cx: &mut WindowContext) -> Arc<str> {
-        "Search...".into()
+        "搜索...".into()
     }
 
     fn update_matches(&mut self, query: String, cx: &mut ViewContext<Picker<Self>>) -> Task<()> {
@@ -219,7 +219,7 @@ impl PickerDelegate for SavedContextPickerDelegate {
                     .gap_2()
                     .child(
                         h_flex().flex_1().overflow_x_hidden().child(
-                            Label::new(context.summary.clone().unwrap_or("New Context".into()))
+                            Label::new(context.summary.clone().unwrap_or("新上下文".into()))
                                 .size(LabelSize::Small),
                         ),
                     )
@@ -231,13 +231,13 @@ impl PickerDelegate for SavedContextPickerDelegate {
                                     Avatar::new(host_user.avatar_uri.clone())
                                         .shape(AvatarShape::Circle)
                                         .into_any_element(),
-                                    Label::new(format!("Shared by @{}", host_user.github_login))
+                                    Label::new(format!("通过共享 @{}", host_user.github_login))
                                         .color(Color::Muted)
                                         .size(LabelSize::Small)
                                         .into_any_element(),
                                 ]
                             } else {
-                                vec![Label::new("Shared by host")
+                                vec![Label::new("由主机共享")
                                     .color(Color::Muted)
                                     .size(LabelSize::Small)
                                     .into_any_element()]
@@ -329,15 +329,15 @@ impl AssistantPanel {
                             .icon_size(IconSize::Small)
                             .on_click(cx.listener(|pane, _, cx| {
                                 let zoom_label = if pane.is_zoomed() {
-                                    "Zoom Out"
+                                    "缩小"
                                 } else {
-                                    "Zoom In"
+                                    "放大"
                                 };
                                 let menu = ContextMenu::build(cx, |menu, cx| {
                                     menu.context(pane.focus_handle(cx))
-                                        .action("New Context", Box::new(NewFile))
-                                        .action("History", Box::new(DeployHistory))
-                                        .action("Prompt Library", Box::new(DeployPromptLibrary))
+                                        .action("新上下文", Box::new(NewFile))
+                                        .action("历史", Box::new(DeployHistory))
+                                        .action("提示库", Box::new(DeployPromptLibrary))
                                         .action(zoom_label, Box::new(ToggleZoom))
                                 });
                                 cx.subscribe(&menu, |pane, _, _: &DismissEvent, _| {
@@ -834,7 +834,7 @@ impl AssistantPanel {
             this.update(&mut cx, |this, cx| {
                 let workspace = workspace
                     .upgrade()
-                    .ok_or_else(|| anyhow!("workspace dropped"))?;
+                    .ok_or_else(|| anyhow!("工作区已丢失"))?;
                 let editor = cx.new_view(|cx| {
                     ContextEditor::for_context(
                         context,
@@ -890,7 +890,7 @@ impl AssistantPanel {
             this.update(&mut cx, |this, cx| {
                 let workspace = workspace
                     .upgrade()
-                    .ok_or_else(|| anyhow!("workspace dropped"))?;
+                    .ok_or_else(|| anyhow!("工作区已丢失"))?;
                 let editor = cx.new_view(|cx| {
                     ContextEditor::for_context(
                         context,
@@ -1046,7 +1046,7 @@ impl Panel for AssistantPanel {
     }
 
     fn icon_tooltip(&self, _cx: &WindowContext) -> Option<&'static str> {
-        Some("Assistant Panel")
+        Some("助理面板")
     }
 
     fn toggle_action(&self) -> Box<dyn Action> {
@@ -1099,7 +1099,7 @@ pub struct ContextEditor {
     assistant_panel: WeakView<AssistantPanel>,
 }
 
-const DEFAULT_TAB_TITLE: &str = "New Context";
+const DEFAULT_TAB_TITLE: &str = "新上下文";
 const MAX_TAB_TITLE_LEN: usize = 16;
 
 impl ContextEditor {
@@ -1250,9 +1250,9 @@ impl ContextEditor {
     fn debug_edit_steps(&mut self, _: &DebugEditSteps, cx: &mut ViewContext<Self>) {
         let mut output = String::new();
         for (i, step) in self.context.read(cx).edit_steps().iter().enumerate() {
-            output.push_str(&format!("Step {}:\n", i + 1));
+            output.push_str(&format!("步 {}:\n", i + 1));
             output.push_str(&format!(
-                "Content: {}\n",
+                "内容: {}\n",
                 self.context
                     .read(cx)
                     .buffer()
@@ -1265,17 +1265,17 @@ impl ContextEditor {
                     operations,
                     raw_output,
                 }) => {
-                    output.push_str(&format!("Raw Output:\n{raw_output}\n"));
-                    output.push_str("Parsed Operations:\n");
+                    output.push_str(&format!("原始输出:\n{raw_output}\n"));
+                    output.push_str("解析操作:\n");
                     for op in operations {
                         output.push_str(&format!("  {:?}\n", op));
                     }
                 }
                 Some(EditStepOperations::Pending(_)) => {
-                    output.push_str("Operations: Pending\n");
+                    output.push_str("操作：待定\n");
                 }
                 None => {
-                    output.push_str("Operations: None\n");
+                    output.push_str("操作：无\n");
                 }
             }
             output.push('\n');
@@ -1758,7 +1758,7 @@ impl ContextEditor {
 
                 cx.update(|cx| {
                     for suggestion in suggestion_group.suggestions {
-                        let description = suggestion.description.unwrap_or_else(|| "Delete".into());
+                        let description = suggestion.description.unwrap_or_else(|| "删除".into());
                         let range = {
                             let buffer = editor.read(cx).buffer().read(cx).read(cx);
                             let (&excerpt_id, _, _) = buffer.as_singleton().unwrap();
@@ -1827,7 +1827,7 @@ impl ContextEditor {
                         {
                             for suggestion in suggestion_group.suggestions {
                                 let description =
-                                    suggestion.description.unwrap_or_else(|| "Delete".into());
+                                    suggestion.description.unwrap_or_else(|| "删除".into());
                                 let range = {
                                     let multibuffer = multibuffer.read(cx);
                                     multibuffer
@@ -1935,15 +1935,15 @@ impl ContextEditor {
                             let sender = ButtonLike::new("role")
                                 .style(ButtonStyle::Filled)
                                 .child(match message.role {
-                                    Role::User => Label::new("You").color(Color::Default),
-                                    Role::Assistant => Label::new("Assistant").color(Color::Info),
-                                    Role::System => Label::new("System").color(Color::Warning),
+                                    Role::User => Label::new("您").color(Color::Default),
+                                    Role::Assistant => Label::new("助手").color(Color::Info),
+                                    Role::System => Label::new("系统").color(Color::Warning),
                                 })
                                 .tooltip(|cx| {
                                     Tooltip::with_meta(
-                                        "Toggle message role",
+                                        "切换消息角色",
                                         None,
-                                        "Available roles: You (User), Assistant, System",
+                                        "可用角色：您（用户）、助手、系统",
                                         cx,
                                     )
                                 })
@@ -2162,11 +2162,11 @@ impl ContextEditor {
         let focus_handle = self.focus_handle(cx).clone();
         let button_text = match self.edit_step_for_cursor(cx) {
             Some(edit_step) => match &edit_step.operations {
-                Some(EditStepOperations::Pending(_)) => "Computing Changes...",
-                Some(EditStepOperations::Parsed { .. }) => "Apply Changes",
-                None => "Send",
+                Some(EditStepOperations::Pending(_)) => "计算变更...",
+                Some(EditStepOperations::Parsed { .. }) => "应用更改",
+                None => "发送",
             },
-            None => "Send",
+            None => "发送",
         };
         ButtonLike::new("send_button")
             .style(ButtonStyle::Filled)
@@ -2523,7 +2523,7 @@ impl ContextEditorToolbarItem {
 
         PopoverMenu::new("inject-context-menu")
             .trigger(IconButton::new("trigger", IconName::Quote).tooltip(|cx| {
-                Tooltip::with_meta("Insert Context", None, "Type / to insert via keyboard", cx)
+                Tooltip::with_meta("插入上下文", None, "输入 / 通过键盘插入", cx)
             }))
             .menu(move |cx| {
                 let active_context_editor = active_context_editor.clone()?;
@@ -2564,7 +2564,7 @@ impl ContextEditorToolbarItem {
                     if let Some(active_editor_focus_handle) = active_editor_focus_handle.clone() {
                         menu = menu
                             .context(active_editor_focus_handle)
-                            .action("Quote Selection", Box::new(QuoteSelection));
+                            .action("引用选择", Box::new(QuoteSelection));
                     }
 
                     menu
@@ -2621,7 +2621,7 @@ impl Render for ContextEditorToolbarItem {
                 left_side
                     .child(
                         IconButton::new("regenerate-context", IconName::ArrowCircle)
-                            .tooltip(|cx| Tooltip::text("Regenerate Summary", cx))
+                            .tooltip(|cx| Tooltip::text("再生摘要", cx))
                             .on_click(cx.listener(move |_, _, cx| {
                                 cx.emit(ContextEditorToolbarItemEvent::RegenerateSummary)
                             })),
@@ -2752,7 +2752,7 @@ impl Item for ContextHistory {
     type Event = ();
 
     fn tab_content_text(&self, _cx: &WindowContext) -> Option<SharedString> {
-        Some("History".into())
+        Some("历史".into())
     }
 }
 
@@ -2834,7 +2834,7 @@ fn render_docs_slash_command_trailer(
                 ))
                 .tooltip({
                     let package = package.clone();
-                    move |cx| Tooltip::text(format!("Indexing {package}…"), cx)
+                    move |cx| Tooltip::text(format!("索引 {package}…"), cx)
                 })
                 .into_any_element(),
         );
@@ -2845,7 +2845,7 @@ fn render_docs_slash_command_trailer(
             div()
                 .id(("latest-error", row.0))
                 .child(Icon::new(IconName::ExclamationTriangle).color(Color::Warning))
-                .tooltip(move |cx| Tooltip::text(format!("failed to index: {latest_error}"), cx))
+                .tooltip(move |cx| Tooltip::text(format!("索引失败: {latest_error}"), cx))
                 .into_any_element(),
         )
     }
@@ -2869,7 +2869,7 @@ fn make_lsp_adapter_delegate(
         let worktree = project
             .worktrees(cx)
             .next()
-            .ok_or_else(|| anyhow!("no worktrees when constructing ProjectLspAdapterDelegate"))?;
+            .ok_or_else(|| anyhow!("构造 ProjectLspAdapterDelegate 时没有工作树"))?;
         Ok(ProjectLspAdapterDelegate::new(project, &worktree, cx) as Arc<dyn LspAdapterDelegate>)
     })
 }
@@ -2879,7 +2879,7 @@ fn slash_command_error_block_renderer(message: String) -> RenderBlock {
         div()
             .pl_6()
             .child(
-                Label::new(format!("error: {}", message))
+                Label::new(format!("错误: {}", message))
                     .single_line()
                     .color(Color::Error),
             )

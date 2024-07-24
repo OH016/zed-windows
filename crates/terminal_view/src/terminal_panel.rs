@@ -95,11 +95,11 @@ impl TerminalPanel {
                                 let focus_handle = pane.focus_handle(cx);
                                 let menu = ContextMenu::build(cx, |menu, _| {
                                     menu.action(
-                                        "New Terminal",
+                                        "新建终端",
                                         workspace::NewTerminal.boxed_clone(),
                                     )
                                     .entry(
-                                        "Spawn task",
+                                        "生成任务",
                                         Some(tasks_ui::Spawn::modal().boxed_clone()),
                                         move |cx| {
                                             // We want the focus to go back to terminal panel once task modal is dismissed,
@@ -118,7 +118,7 @@ impl TerminalPanel {
                                 .detach();
                                 pane.new_item_menu = Some(menu);
                             }))
-                            .tooltip(|cx| Tooltip::text("New...", cx)),
+                            .tooltip(|cx| Tooltip::text("新建...", cx)),
                     )
                     .when_some(pane.new_item_menu.as_ref(), |el, new_item_menu| {
                         el.child(Pane::render_menu_overlay(new_item_menu))
@@ -134,7 +134,7 @@ impl TerminalPanel {
                             }))
                             .tooltip(move |cx| {
                                 Tooltip::for_action(
-                                    if zoomed { "Zoom Out" } else { "Zoom In" },
+                                    if zoomed { "缩小" } else { "放大" },
                                     &ToggleZoom,
                                     cx,
                                 )
@@ -444,12 +444,12 @@ impl TerminalPanel {
         }
         let (existing_item_index, existing_terminal) = terminals_for_task
             .last()
-            .expect("covered no terminals case above")
+            .expect("已经涵盖了上述没有终端的情况")
             .clone();
         if allow_concurrent_runs {
             debug_assert!(
                 !use_new_terminal,
-                "Should have handled 'allow_concurrent_runs && use_new_terminal' case above"
+                "应该处理上面的`allow_concurrent_runs && use_new_terminal`情况"
             );
             self.replace_terminal(spawn_task, existing_item_index, existing_terminal, cx);
         } else {
@@ -546,7 +546,7 @@ impl TerminalPanel {
                 )
             {
                 return Task::ready(Err(anyhow::anyhow!(
-                    "terminal not yet supported for remote projects"
+                    "终端尚不支持远程项目"
                 )));
             }
         }
@@ -830,7 +830,7 @@ impl Panel for TerminalPanel {
     }
 
     fn icon_tooltip(&self, _cx: &WindowContext) -> Option<&'static str> {
-        Some("Terminal Panel")
+        Some("终端面板")
     }
 
     fn toggle_action(&self) -> Box<dyn gpui::Action> {
@@ -853,7 +853,7 @@ fn retrieve_system_shell() -> Option<String> {
         use util::ResultExt;
 
         return std::env::var("SHELL")
-            .context("Error finding SHELL in env.")
+            .context("在环境中查找 shell 时出错")
             .log_err();
     }
     // `alacritty_terminal` uses this as default on Windows. See:
