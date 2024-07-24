@@ -256,13 +256,13 @@ struct AuthenticationPrompt {
 
 impl Render for AuthenticationPrompt {
     fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
-        const LABEL: &str = "Generate and analyze code with language models. You can dialog with the assistant in this panel or transform code inline.";
+        const LABEL: &str = "使用语言模型生成和分析代码,您可以在此面板中与助手进行对话,也可以联想转换代码";
 
         v_flex().gap_6().p_4().child(Label::new(LABEL)).child(
             v_flex()
                 .gap_2()
                 .child(
-                    Button::new("sign_in", "Sign in")
+                    Button::new("登录", "登录")
                         .icon_color(Color::Muted)
                         .icon(IconName::Github)
                         .icon_position(IconPosition::Start)
@@ -277,7 +277,7 @@ impl Render for AuthenticationPrompt {
                 )
                 .child(
                     div().flex().w_full().items_center().child(
-                        Label::new("Sign in to enable collaboration.")
+                        Label::new("登录以启用协作")
                             .color(Color::Muted)
                             .size(LabelSize::Small),
                     ),
