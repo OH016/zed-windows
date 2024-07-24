@@ -333,11 +333,11 @@ impl ProjectPanel {
                                     allow_preview,
                                     cx,
                                 )
-                                .detach_and_prompt_err("Failed to open file", cx, move |e, _| {
+                                .detach_and_prompt_err("打开文件失败", cx, move |e, _| {
                                     match e.error_code() {
-                                        ErrorCode::Disconnected => Some("Disconnected from remote project".to_string()),
+                                        ErrorCode::Disconnected => Some("与远程项目断开连接".to_string()),
                                         ErrorCode::UnsharedItem => Some(format!(
-                                            "{} is not shared by the host. This could be because it has been marked as `private`",
+                                            "{} 不被主机共享。这可能是因为它已被标记为 `私有`",
                                             file_path.display()
                                         )),
                                         _ => None,
@@ -391,7 +391,7 @@ impl ProjectPanel {
             .background_executor()
             .spawn(async move { KEY_VALUE_STORE.read_kvp(PROJECT_PANEL_KEY) })
             .await
-            .map_err(|e| anyhow!("Failed to load project panel: {}", e))
+            .map_err(|e| anyhow!("加载项目面板失败: {}", e))
             .log_err()
             .flatten()
             .map(|panel| serde_json::from_str::<SerializedProjectPanel>(&panel))
@@ -467,36 +467,36 @@ impl ProjectPanel {
                 menu.context(self.focus_handle.clone()).when_else(
                     is_read_only,
                     |menu| {
-                        menu.action("Copy Relative Path", Box::new(CopyRelativePath))
+                        menu.action("复制相关路径", Box::new(CopyRelativePath))
                             .when(is_dir, |menu| {
-                                menu.action("Search Inside", Box::new(NewSearchInDirectory))
+                                menu.action("内部搜索", Box::new(NewSearchInDirectory))
                             })
                     },
                     |menu| {
-                        menu.action("New File", Box::new(NewFile))
-                            .action("New Folder", Box::new(NewDirectory))
+                        menu.action("新建文件", Box::new(NewFile))
+                            .action("新建文件夹", Box::new(NewDirectory))
                             .separator()
                             .when(cfg!(target_os = "macos"), |menu| {
-                                menu.action("Reveal in Finder", Box::new(RevealInFileManager))
+                                menu.action("在查找器中显示", Box::new(RevealInFileManager))
                             })
                             .when(cfg!(not(target_os = "macos")), |menu| {
-                                menu.action("Reveal in File Manager", Box::new(RevealInFileManager))
+                                menu.action("在文件管理器中显示", Box::new(RevealInFileManager))
                             })
-                            .action("Open in Terminal", Box::new(OpenInTerminal))
+                            .action("在终端中打开", Box::new(OpenInTerminal))
                             .when(is_dir, |menu| {
                                 menu.separator()
-                                    .action("Find in Folder…", Box::new(NewSearchInDirectory))
+                                    .action("在文件夹中查找...", Box::new(NewSearchInDirectory))
                             })
                             .when(is_unfoldable, |menu| {
-                                menu.action("Unfold Directory", Box::new(UnfoldDirectory))
+                                menu.action("展开目录", Box::new(UnfoldDirectory))
                             })
                             .when(is_foldable, |menu| {
-                                menu.action("Fold Directory", Box::new(FoldDirectory))
+                                menu.action("折叠目录", Box::new(FoldDirectory))
                             })
                             .separator()
-                            .action("Cut", Box::new(Cut))
-                            .action("Copy", Box::new(Copy))
-                            .action("Duplicate", Box::new(Duplicate))
+                            .action("剪切", Box::new(Cut))
+                            .action("复制", Box::new(Copy))
+                            .action("复写", Box::new(Duplicate))
                             // TODO: Paste should always be visible, cbut disabled when clipboard is empty
                             .when_some(self.clipboard.as_ref(), |menu, entry| {
                                 let entries_for_worktree_id = (SelectedEntry {
@@ -513,26 +513,26 @@ impl ProjectPanel {
                                         .range(entries_for_worktree_id)
                                         .next()
                                         .is_some(),
-                                    |menu| menu.action("Paste", Box::new(Paste)),
+                                    |menu| menu.action("粘贴", Box::new(Paste)),
                                 )
                             })
                             .separator()
-                            .action("Copy Path", Box::new(CopyPath))
-                            .action("Copy Relative Path", Box::new(CopyRelativePath))
+                            .action("复制路径", Box::new(CopyPath))
+                            .action("复制相对路径", Box::new(CopyRelativePath))
                             .separator()
-                            .action("Rename", Box::new(Rename))
+                            .action("重命名", Box::new(Rename))
                             .when(!is_root, |menu| {
-                                menu.action("Trash", Box::new(Trash { skip_prompt: false }))
-                                    .action("Delete", Box::new(Delete { skip_prompt: false }))
+                                menu.action("垃圾桶", Box::new(Trash { skip_prompt: false }))
+                                    .action("删除", Box::new(Delete { skip_prompt: false }))
                             })
                             .when(!is_remote & is_root, |menu| {
                                 menu.separator()
                                     .action(
-                                        "Add Folder to Project…",
+                                        "将文件夹添加到项目...",
                                         Box::new(workspace::AddFolderToProject),
                                     )
                                     .entry(
-                                        "Remove from Project",
+                                        "从项目中删除",
                                         None,
                                         cx.handler_for(&this, move |this, cx| {
                                             this.project.update(cx, |project, cx| {
@@ -543,7 +543,7 @@ impl ProjectPanel {
                             })
                             .when(is_root, |menu| {
                                 menu.separator()
-                                    .action("Collapse All", Box::new(CollapseAllEntries))
+                                    .action("全部折叠", Box::new(CollapseAllEntries))
                             })
                     },
                 )
@@ -837,7 +837,7 @@ impl ProjectPanel {
                             if is_dir {
                                 project_panel.project.update(cx, |_, cx| {
                                     cx.emit(project::Event::Notification(format!(
-                                        "Created an excluded directory at {abs_path:?}.\nAlter `file_scan_exclusions` in the settings to show it in the panel"
+                                        "创建了一个排除目录位于 {abs_path:?}.\n更改 `文件扫描排除` 在设置中将其显示在面板中"
                                     )))
                                 });
                                 None
@@ -1025,7 +1025,7 @@ impl ProjectPanel {
                 return None;
             }
             let answer = if !skip_prompt {
-                let operation = if trash { "Trash" } else { "Delete" };
+                let operation = if trash { "垃圾桶" } else { "删除" };
 
                 let prompt =
                     if let Some((_, path)) = file_paths.first().filter(|_| file_paths.len() == 1) {
@@ -1041,9 +1041,9 @@ impl ProjectPanel {
                                 .collect::<Vec<_>>();
                             paths.truncate(CUTOFF_POINT);
                             if truncated_path_counts == 1 {
-                                paths.push(".. 1 file not shown".into());
+                                paths.push(".. 1 个文件未显示".into());
                             } else {
-                                paths.push(format!(".. {} files not shown", truncated_path_counts));
+                                paths.push(format!(".. {} 未显示的文件", truncated_path_counts));
                             }
                             paths
                         } else {
@@ -1051,13 +1051,13 @@ impl ProjectPanel {
                         };
 
                         format!(
-                            "Do you want to {} the following {} files?\n{}",
+                            "您是否想 {} 以下 {} 文件?\n{}",
                             operation.to_lowercase(),
                             file_paths.len(),
                             names.join("\n")
                         )
                     };
-                Some(cx.prompt(PromptLevel::Info, &prompt, None, &[operation, "Cancel"]))
+                Some(cx.prompt(PromptLevel::Info, &prompt, None, &[operation, "取消"]))
             } else {
                 None
             };
@@ -1072,7 +1072,7 @@ impl ProjectPanel {
                     this.update(&mut cx, |this, cx| {
                         this.project
                             .update(cx, |project, cx| project.delete_entry(entry_id, trash, cx))
-                            .ok_or_else(|| anyhow!("no such entry"))
+                            .ok_or_else(|| anyhow!("无此条目"))
                     })??
                     .await?;
                 }
@@ -1281,7 +1281,7 @@ impl ProjectPanel {
                 new_path.pop();
 
                 let mut new_file_name = file_name_without_extension.to_os_string();
-                new_file_name.push(" copy");
+                new_file_name.push(" 复制");
                 if ix > 0 {
                     new_file_name.push(format!(" {}", ix));
                 }
@@ -1760,9 +1760,9 @@ impl ProjectPanel {
                     let answer = cx
                         .prompt(
                             PromptLevel::Info,
-                            format!("A file or folder with name {filename} already exists in the destination folder. Do you want to replace it?").as_str(),
+                            format!("文件或文件夹名称为 {filename} 目标文件夹中已经存在,你想更换它吗?").as_str(),
                             None,
-                            &["Replace", "Cancel"],
+                            &["更换", "取消"],
                         )
                         .await?;
                     if answer == 1 {
@@ -2112,7 +2112,7 @@ impl ProjectPanel {
                             div()
                                 .id("symlink_icon")
                                 .tooltip(move |cx| {
-                                    Tooltip::text(format!("{path} • Symbolic Link"), cx)
+                                    Tooltip::text(format!("{path} • 符号链接"), cx)
                                 })
                                 .child(
                                     Icon::new(IconName::ArrowUpRight)
@@ -2487,7 +2487,7 @@ impl Render for ProjectPanel {
                 .p_4()
                 .track_focus(&self.focus_handle)
                 .child(
-                    Button::new("open_project", "Open a project")
+                    Button::new("open_project", "打开一个项目")
                         .style(ButtonStyle::Filled)
                         .full_width()
                         .key_binding(KeyBinding::for_action(&workspace::Open, cx))
@@ -3238,10 +3238,10 @@ mod tests {
         panel.update(cx, |panel, cx| {
             panel.filename_editor.update(cx, |editor, cx| {
                 let file_name_selections = editor.selections.all::<usize>(cx);
-                assert_eq!(file_name_selections.len(), 1, "File editing should have a single selection, but got: {file_name_selections:?}");
+                assert_eq!(file_name_selections.len(), 1, "文件编辑应只有一个选择, 但却: {file_name_selections:?}");
                 let file_name_selection = &file_name_selections[0];
-                assert_eq!(file_name_selection.start, 0, "Should select the file name from the start");
-                assert_eq!(file_name_selection.end, "a-different-filename.tar".len(), "Should not select file extension, but still may select anything up to the last dot..");
+                assert_eq!(file_name_selection.start, 0, "应从开始时选择文件名");
+                assert_eq!(file_name_selection.end, "a-different-filename.tar".len(), "不应选择文件扩展名,但仍可选择最后一个点之前的任何内容。");
 
             });
             panel.cancel(&menu::Cancel, cx)
@@ -3661,18 +3661,18 @@ mod tests {
         cx.executor().run_until_parked();
 
         let pasted_dir = find_project_entry(&panel, "root/b/a", cx);
-        assert_ne!(pasted_dir, None, "Pasted directory should have an entry");
+        assert_ne!(pasted_dir, None, "粘贴的目录应该有一个条目");
 
         let pasted_dir_file = find_project_entry(&panel, "root/b/a/one.txt", cx);
         assert_ne!(
             pasted_dir_file, None,
-            "Pasted directory file should have an entry"
+            "粘贴的目录文件应该有一个条目"
         );
 
         let pasted_dir_inner_dir = find_project_entry(&panel, "root/b/a/inner_dir", cx);
         assert_ne!(
             pasted_dir_inner_dir, None,
-            "Directories inside pasted directory should have an entry"
+            "粘贴目录内的目录应包含一个条目"
         );
 
         toggle_expand_dir(&panel, "root/b/a", cx);
@@ -3770,7 +3770,7 @@ mod tests {
                 "          second.rs",
                 "          third.rs"
             ],
-            "Project panel should have no deleted file, no other file is selected in it"
+            "项目面板中应该没有被删除的文件,也没有选择其他文件"
         );
         ensure_no_open_items_and_panes(&workspace, cx);
 
@@ -3801,7 +3801,7 @@ mod tests {
                     .next()
                     .unwrap()
                     .downcast::<Editor>()
-                    .expect("Open item should be an editor");
+                    .expect("打开项目应该是一个编辑器");
                 open_editor.update(cx, |editor, cx| editor.set_text("Another text!", cx));
             })
             .unwrap();
@@ -3872,7 +3872,7 @@ mod tests {
                 .update(cx, |editor, cx| editor.set_text("test", cx));
             assert!(
                 panel.confirm_edit(cx).is_none(),
-                "Should not allow to confirm on conflicting new directory name"
+                "不应允许对冲突的新目录名称进行确认"
             )
         });
         assert_eq!(
@@ -3882,7 +3882,7 @@ mod tests {
                 "v src",
                 "    > test"
             ],
-            "File list should be unchanged after failed folder create confirmation"
+            "文件夹创建确认失败后,文件列表应保持不变"
         );
 
         select_path(&panel, "src/test/", cx);
@@ -3917,7 +3917,7 @@ mod tests {
                 .update(cx, |editor, cx| editor.set_text("first.rs", cx));
             assert!(
                 panel.confirm_edit(cx).is_none(),
-                "Should not allow to confirm on conflicting new file name"
+                "不应允许对冲突的新文件名进行确认"
             )
         });
         assert_eq!(
@@ -3929,7 +3929,7 @@ mod tests {
                 "          second.rs",
                 "          third.rs"
             ],
-            "File list should be unchanged after failed file create confirmation"
+            "文件创建确认失败后,文件列表应保持不变"
         );
 
         select_path(&panel, "src/test/first.rs", cx);
@@ -3965,7 +3965,7 @@ mod tests {
                 .update(cx, |editor, cx| editor.set_text("second.rs", cx));
             assert!(
                 panel.confirm_edit(cx).is_none(),
-                "Should not allow to confirm on conflicting file rename"
+                "不应允许对冲突的文件重命名进行确认"
             )
         });
         assert_eq!(
@@ -3977,7 +3977,7 @@ mod tests {
                 "          second.rs",
                 "          third.rs"
             ],
-            "File list should be unchanged after failed rename confirmation"
+            "重命名确认失败后,文件列表应保持不变"
         );
     }
 
@@ -4393,7 +4393,7 @@ mod tests {
             find_project_entry(&panel, "project_root/dir_1/gitignored_dir/file_a.py", cx);
         assert_eq!(
             gitignored_dir_file, None,
-            "File in the gitignored dir should not have an entry before its dir is toggled"
+            "在切换 gitignored 目录之前,其目录中的文件不应有条目"
         );
 
         toggle_expand_dir(&panel, "project_root/dir_1", cx);
@@ -4415,11 +4415,11 @@ mod tests {
                 "    > dir_2",
                 "      .gitignore",
             ],
-            "Should show gitignored dir file list in the project panel"
+            "应在项目面板中显示 gitignored 目录文件列表"
         );
         let gitignored_dir_file =
             find_project_entry(&panel, "project_root/dir_1/gitignored_dir/file_a.py", cx)
-                .expect("after gitignored dir got opened, a file entry should be present");
+                .expect("打开 gitignored 目录后,应出现一个文件条目");
 
         toggle_expand_dir(&panel, "project_root/dir_1/gitignored_dir", cx);
         toggle_expand_dir(&panel, "project_root/dir_1", cx);
@@ -4432,7 +4432,7 @@ mod tests {
                 "    > dir_2",
                 "      .gitignore",
             ],
-            "Should hide all dir contents again and prepare for the auto reveal test"
+            "应再次隐藏所有目录内容,并准备自动揭示测试"
         );
 
         for file_entry in [dir_1_file, dir_2_file, gitignored_dir_file] {
@@ -4451,7 +4451,7 @@ mod tests {
                     "    > dir_2",
                     "      .gitignore",
                 ],
-                "When no auto reveal is enabled, the selected entry should not be revealed in the project panel"
+                "如果未启用自动显示功能,则所选条目不会在项目面板中显示"
             );
         }
 
@@ -4482,7 +4482,7 @@ mod tests {
                 "    > dir_2",
                 "      .gitignore",
             ],
-            "When auto reveal is enabled, not ignored dir_1 entry should be revealed"
+            "启用自动显示时,不应显示未忽略的 dir_1 条目"
         );
 
         panel.update(cx, |panel, cx| {
@@ -4507,7 +4507,7 @@ mod tests {
                 "          file_3.py",
                 "      .gitignore",
             ],
-            "When auto reveal is enabled, not ignored dir_2 entry should be revealed"
+            "启用自动显示时,不应显示未忽略的 dir_2 条目"
         );
 
         panel.update(cx, |panel, cx| {
@@ -4534,7 +4534,7 @@ mod tests {
                 "          file_3.py",
                 "      .gitignore",
             ],
-            "When auto reveal is enabled, a gitignored selected entry should not be revealed in the project panel"
+            "启用自动显示功能后,项目面板中不应显示已忽略的已选条目"
         );
 
         panel.update(cx, |panel, cx| {
@@ -4562,7 +4562,7 @@ mod tests {
                 "          file_3.py",
                 "      .gitignore",
             ],
-            "When a gitignored entry is explicitly revealed, it should be shown in the project tree"
+            "明确显示 gitignored 条目时,应在项目树中显示它"
         );
     }
 
@@ -4631,7 +4631,7 @@ mod tests {
             find_project_entry(&panel, "project_root/dir_1/gitignored_dir/file_a.py", cx);
         assert_eq!(
             gitignored_dir_file, None,
-            "File in the gitignored dir should not have an entry before its dir is toggled"
+            "在切换 gitignored 目录之前,其目录中的文件不应有条目"
         );
 
         toggle_expand_dir(&panel, "project_root/dir_1", cx);
@@ -4653,11 +4653,11 @@ mod tests {
                 "    > dir_2",
                 "      .gitignore",
             ],
-            "Should show gitignored dir file list in the project panel"
+            "应在项目面板中显示 gitignored 目录文件列表"
         );
         let gitignored_dir_file =
             find_project_entry(&panel, "project_root/dir_1/gitignored_dir/file_a.py", cx)
-                .expect("after gitignored dir got opened, a file entry should be present");
+                .expect("打开 gitignored 目录后,应出现一个文件条目");
 
         toggle_expand_dir(&panel, "project_root/dir_1/gitignored_dir", cx);
         toggle_expand_dir(&panel, "project_root/dir_1", cx);
@@ -4670,7 +4670,7 @@ mod tests {
                 "    > dir_2",
                 "      .gitignore",
             ],
-            "Should hide all dir contents again and prepare for the explicit reveal test"
+            "应再次隐藏所有目录内容,并为显式显示测试做好准备"
         );
 
         for file_entry in [dir_1_file, dir_2_file, gitignored_dir_file] {
@@ -4689,7 +4689,7 @@ mod tests {
                     "    > dir_2",
                     "      .gitignore",
                 ],
-                "When no auto reveal is enabled, the selected entry should not be revealed in the project panel"
+                "如果未启用自动显示功能,则所选条目不会在项目面板中显示"
             );
         }
 
@@ -4712,7 +4712,7 @@ mod tests {
                 "    > dir_2",
                 "      .gitignore",
             ],
-            "With no auto reveal, explicit reveal should show the dir_1 entry in the project panel"
+            "在没有自动显示的情况下,显式显示应在项目面板中显示 dir_1 条目"
         );
 
         panel.update(cx, |panel, cx| {
@@ -4737,7 +4737,7 @@ mod tests {
                 "          file_3.py",
                 "      .gitignore",
             ],
-            "With no auto reveal, explicit reveal should show the dir_2 entry in the project panel"
+            "在没有自动显示的情况下,显式显示应在项目面板中显示 dir_2 条目"
         );
 
         panel.update(cx, |panel, cx| {
@@ -4765,7 +4765,7 @@ mod tests {
                 "          file_3.py",
                 "      .gitignore",
             ],
-            "With no auto reveal, explicit reveal should show the gitignored entry in the project panel"
+            "在没有自动显示的情况下,显式显示应在项目面板中显示 gitignored 条目"
         );
     }
 
@@ -4817,7 +4817,7 @@ mod tests {
             .update(cx, |workspace, cx| {
                 assert!(
                     workspace.active_item(cx).is_none(),
-                    "Should have no active items in the beginning"
+                    "开始时应没有活动项目"
                 );
             })
             .unwrap();
@@ -4842,22 +4842,22 @@ mod tests {
         assert_eq!(
             visible_entries_as_strings(&panel, 0..13, cx),
             &["v root1", "      .dockerignore"],
-            "Excluded dir should not be shown after opening a file in it"
+            "在排除的目录中打开文件后,不应显示该目录"
         );
         panel.update(cx, |panel, cx| {
             assert!(
                 !panel.filename_editor.read(cx).is_focused(cx),
-                "Should have closed the file name editor"
+                "应该关闭文件名编辑器"
             );
         });
         workspace
             .update(cx, |workspace, cx| {
                 let active_entry_path = workspace
                     .active_item(cx)
-                    .expect("should have opened and activated the excluded item")
+                    .expect("应已打开并激活排除项目")
                     .act_as::<TestProjectItemView>(cx)
                     .expect(
-                        "should have opened the corresponding project item for the excluded item",
+                        "本应为排除项目打开相应的项目项目",
                     )
                     .read(cx)
                     .path
@@ -4865,18 +4865,18 @@ mod tests {
                 assert_eq!(
                     active_entry_path.path.as_ref(),
                     Path::new(excluded_file_path),
-                    "Should open the excluded file"
+                    "应打开排除在外的文件"
                 );
 
                 assert!(
                     workspace.notification_ids().is_empty(),
-                    "Should have no notifications after opening an excluded file"
+                    "打开排除文件后应无任何通知"
                 );
             })
             .unwrap();
         assert!(
             fs.is_file(Path::new("/root1/.git/COMMIT_EDITMSG")).await,
-            "Should have created the excluded file"
+            "本应创建排除文件"
         );
 
         select_path(&panel, "root1", cx);
@@ -4897,12 +4897,12 @@ mod tests {
         assert_eq!(
             visible_entries_as_strings(&panel, 0..13, cx),
             &["v root1", "      .dockerignore"],
-            "Should not change the project panel after trying to create an excluded directorya directory with the same name as the excluded file"
+            "在尝试创建与排除文件同名的排除目录a 后,不应更改项目面板"
         );
         panel.update(cx, |panel, cx| {
             assert!(
                 !panel.filename_editor.read(cx).is_focused(cx),
-                "Should have closed the file name editor"
+                "应该关闭文件名编辑器"
             );
         });
         workspace
@@ -4911,7 +4911,7 @@ mod tests {
                 assert_eq!(
                     notifications.len(),
                     1,
-                    "Should receive one notification with the error message"
+                    "应收到一个带有错误信息的通知"
                 );
                 workspace.dismiss_notification(notifications.first().unwrap(), cx);
                 assert!(workspace.notification_ids().is_empty());
@@ -4936,12 +4936,12 @@ mod tests {
         assert_eq!(
             visible_entries_as_strings(&panel, 0..13, cx),
             &["v root1", "      .dockerignore"],
-            "Should not change the project panel after trying to create an excluded directory"
+            "尝试创建排除目录后不应更改项目面板"
         );
         panel.update(cx, |panel, cx| {
             assert!(
                 !panel.filename_editor.read(cx).is_focused(cx),
-                "Should have closed the file name editor"
+                "应该关闭文件名编辑器"
             );
         });
         workspace
@@ -4950,7 +4950,7 @@ mod tests {
                 assert_eq!(
                     notifications.len(),
                     1,
-                    "Should receive one notification explaining that no directory is actually shown"
+                    "应收到一个通知，说明实际上没有显示目录"
                 );
                 workspace.dismiss_notification(notifications.first().unwrap(), cx);
                 assert!(workspace.notification_ids().is_empty());
@@ -4958,7 +4958,7 @@ mod tests {
             .unwrap();
         assert!(
             fs.is_dir(Path::new("/root1/excluded_dir")).await,
-            "Should have created the excluded directory"
+            "本应创建排除目录"
         );
     }
 
@@ -4977,7 +4977,7 @@ mod tests {
                     return;
                 }
             }
-            panic!("no worktree for path {:?}", path);
+            panic!("路径无工作树 {:?}", path);
         });
     }
 
@@ -4995,7 +4995,7 @@ mod tests {
                     return;
                 }
             }
-            panic!("no worktree for path {:?}", path);
+            panic!("路径无工作树 {:?}", path);
         });
     }
 
@@ -5012,7 +5012,7 @@ mod tests {
                     return worktree.entry_for_path(relative_path).map(|entry| entry.id);
                 }
             }
-            panic!("no worktree for path {path:?}");
+            panic!("路径无工作树 {path:?}");
         })
     }
 
@@ -5028,12 +5028,12 @@ mod tests {
         panel.update(cx, |panel, cx| {
             panel.for_each_visible_entry(range, cx, |project_entry, details, _| {
                 if details.is_editing {
-                    assert!(!has_editor, "duplicate editor entry");
+                    assert!(!has_editor, "重复编辑条目");
                     has_editor = true;
                 } else {
                     assert!(
                         project_entries.insert(project_entry),
-                        "duplicate project entry {:?} {:?}",
+                        "重复项目条目 {:?} {:?}",
                         project_entry,
                         details
                     );
@@ -5130,7 +5130,7 @@ mod tests {
                         worktree_id,
                         path: Arc::from(Path::new(expected_path))
                     }],
-                    "Should have opened file, selected in project panel"
+                    "应已打开文件,并在项目面板中选定"
                 );
             })
             .unwrap();
@@ -5139,19 +5139,19 @@ mod tests {
     fn submit_deletion(panel: &View<ProjectPanel>, cx: &mut VisualTestContext) {
         assert!(
             !cx.has_pending_prompt(),
-            "Should have no prompts before the deletion"
+            "删除前应无提示"
         );
         panel.update(cx, |panel, cx| {
             panel.delete(&Delete { skip_prompt: false }, cx)
         });
         assert!(
             cx.has_pending_prompt(),
-            "Should have a prompt after the deletion"
+            "删除后应有提示"
         );
         cx.simulate_prompt_answer(0);
         assert!(
             !cx.has_pending_prompt(),
-            "Should have no prompts after prompt was replied to"
+            "回复提示后应无提示"
         );
         cx.executor().run_until_parked();
     }
@@ -5159,12 +5159,12 @@ mod tests {
     fn submit_deletion_skipping_prompt(panel: &View<ProjectPanel>, cx: &mut VisualTestContext) {
         assert!(
             !cx.has_pending_prompt(),
-            "Should have no prompts before the deletion"
+            "删除前应无提示"
         );
         panel.update(cx, |panel, cx| {
             panel.delete(&Delete { skip_prompt: true }, cx)
         });
-        assert!(!cx.has_pending_prompt(), "Should have received no prompts");
+        assert!(!cx.has_pending_prompt(), "不应收到提示");
         cx.executor().run_until_parked();
     }
 
@@ -5174,7 +5174,7 @@ mod tests {
     ) {
         assert!(
             !cx.has_pending_prompt(),
-            "Should have no prompts after deletion operation closes the file"
+            "删除操作关闭文件后应无提示"
         );
         workspace
             .read_with(cx, |workspace, cx| {
@@ -5185,7 +5185,7 @@ mod tests {
                     .collect::<Vec<_>>();
                 assert!(
                     open_project_paths.is_empty(),
-                    "Deleted file's buffer should be closed, but got open files: {open_project_paths:?}"
+                    "已删除文件的缓冲区应关闭,但有打开的文件: {open_project_paths:?}"
                 );
             })
             .unwrap();

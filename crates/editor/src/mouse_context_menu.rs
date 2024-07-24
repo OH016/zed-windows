@@ -151,30 +151,30 @@ pub fn deploy_context_menu(
         ui::ContextMenu::build(cx, |menu, _cx| {
             let builder = menu
                 .on_blur_subscription(Subscription::new(|| {}))
-                .action("Rename Symbol", Box::new(Rename))
-                .action("Go to Definition", Box::new(GoToDefinition))
-                .action("Go to Type Definition", Box::new(GoToTypeDefinition))
-                .action("Go to Implementation", Box::new(GoToImplementation))
-                .action("Find All References", Box::new(FindAllReferences))
+                .action("重命名符号", Box::new(Rename))
+                .action("转到定义", Box::new(GoToDefinition))
+                .action("转到类型定义", Box::new(GoToTypeDefinition))
+                .action("转到实施", Box::new(GoToImplementation))
+                .action("查找所有参考资料", Box::new(FindAllReferences))
                 .action(
-                    "Code Actions",
+                    "代码活动",
                     Box::new(ToggleCodeActions {
                         deployed_from_indicator: None,
                     }),
                 )
                 .separator()
-                .action("Cut", Box::new(Cut))
-                .action("Copy", Box::new(Copy))
-                .action("Paste", Box::new(Paste))
+                .action("剪切", Box::new(Cut))
+                .action("复制", Box::new(Copy))
+                .action("粘贴", Box::new(Paste))
                 .separator()
                 .when(cfg!(target_os = "macos"), |builder| {
-                    builder.action("Reveal in Finder", Box::new(RevealInFileManager))
+                    builder.action("在查找器中显示", Box::new(RevealInFileManager))
                 })
                 .when(cfg!(not(target_os = "macos")), |builder| {
-                    builder.action("Reveal in File Manager", Box::new(RevealInFileManager))
+                    builder.action("在文件管理器中显示", Box::new(RevealInFileManager))
                 })
-                .action("Open in Terminal", Box::new(OpenInTerminal))
-                .action("Copy Permalink", Box::new(CopyPermalinkToLine));
+                .action("在终端中打开", Box::new(OpenInTerminal))
+                .action("复制永久链接", Box::new(CopyPermalinkToLine));
             match focus {
                 Some(focus) => builder.context(focus),
                 None => builder,
