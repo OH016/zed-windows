@@ -126,7 +126,7 @@ impl Render for QuickActionBar {
                 IconName::MagnifyingGlass,
                 !self.buffer_search_bar.read(cx).is_dismissed(),
                 Box::new(buffer_search::Deploy::find()),
-                "缓冲区搜索",
+                "搜索",
                 {
                     let buffer_search_bar = self.buffer_search_bar.clone();
                     move |_, cx| {
